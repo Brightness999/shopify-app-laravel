@@ -35,6 +35,7 @@ class ShopifyAdminApi
                         0 => array(
                             'barcode' => $product->upc,
                             "weight" => $product->weight,
+                            "weight_unit" => "lb",
                             "price" => (float)$product->price,
                             "cost" => (float)$product->cost,
                             "sku" => $product->sku,

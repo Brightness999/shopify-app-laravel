@@ -57,6 +57,7 @@ class ShopifyBulkPublish implements ShouldQueue
     public function handle()
     {
         foreach ($this->products as $product) {
+            DB::table('temp_publish_products')->where('user_id', Auth::user()->id)->where('action', 'publish')->where('id', json_decode($product)->id)->delete();
             $attemps = 3;
             $i = 0;
             if (json_decode($product)->tags != null) {

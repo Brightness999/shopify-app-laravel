@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 use App\Jobs\ShopifyBulkPublish;
 use App\Settings;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 
 class ImportListController extends Controller
@@ -38,109 +37,44 @@ class ImportListController extends Controller
     public function index()
 
     {
-
         $this->authorize('view-merchant-import-list');
-
         $prods = Products::select('products.*', 'import_list.id as id_import_list')
-
             ->join('import_list', 'import_list.id_product', '=', 'products.id')
-
             ->whereNotIn('import_list.id', MyProducts::where('id_customer', Auth::User()->id)->pluck('id_imp_product'))
-
-            ->where('import_list.id_customer', Auth::user()->id)->orderBy('import_list.updated_at', 'desc');
-
-        $total_count = $prods->count();
-
-        $prods = $prods->paginate(10);
-        foreach ($prods as $product) {
-
-            if ($product['images'] != null && count(json_decode($product['images'])) > 0) {
-                $product['image_url'] = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203' . json_decode($product['images'])[0]->file;
-            } else {
-                $product['image_url'] = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203no_selection';
-            }
-
-            $search = new SearchController;
-
-            $product['description'] = $search->getAttributeByCode($product, 'description');
-
-            $product['size'] = $search->getAttributeByCode($product, 'size');
-
-            $product['images'] = json_decode($product['images']);
-
-            $product['ship_height'] = round($search->getAttributeByCode($product, 'ship_height'), 2);
-
-            $product['ship_width'] = round($search->getAttributeByCode($product, 'ship_width'), 2);
-
-            $product['ship_length'] = round($search->getAttributeByCode($product, 'ship_length'), 2);
-        }
-
-        $settings = Settings::where('id_merchant', Auth::user()->id)->first();
-
-        if ($settings == null) {
-
-            $settings = new Settings();
-
-            $settings->set8 = 0;
-        }
-
-        return view('import-list_v2', array(
-
-            'array_products' => $prods,
-
-            'profit' => $settings->set8,
-
-            'total_count' => $total_count
-
-        ));
+            ->where('import_list.id_customer', Auth::user()->id);
+        return view('import-list_v2', [
+            'total_count' => $prods->count()
+        ]);
     }
-
-
 
     public function publishShopify(Request $request)
 
     {
-
         $this->authorize('plan_publish-product-import-list');
-
         $settings = Settings::where('id_merchant', Auth::User()->id)->first();
-
         $published = false;
-
         if ($settings != null) {
-
             $published = $settings->set1 == 1;
         }
-
         ShopifyBulkPublish::dispatchNow(Auth::User(), [json_encode((object) $request->product)], $published);
-
-        $myproduct = MyProducts::select('id_shopify')->where('id_customer', Auth::User()->id)->where('id_imp_product', $request->product['id'])->first();
-
-        return response()->json(array(
-
+        $myproduct = MyProducts::select('id_shopify')
+            ->where('id_customer', Auth::User()->id)
+            ->where('id_imp_product', $request->product['id'])
+            ->first();
+        return response()->json([
             'result' => $myproduct != null,
-
             'id_shopify' => $myproduct != null ? $myproduct->id_shopify : 0
-
-        ));
+        ]);
     }
-
-
 
     public function publishAllShopify(Request $request)
     {
         $this->authorize('plan_bulk-publish-product-import-list');
-
-        $result = 'error';
-
         $settings = Settings::where('id_merchant', Auth::User()->id)->first();
-
         $published = false;
-
         if ($settings != null) {
             $published = $settings->set1 == 1;
         }
-
         $rows = [];
         foreach (json_decode($request->products) as $product) {
             $rows[] = [
@@ -151,40 +85,25 @@ class ImportListController extends Controller
                 'action' => 'publish'
             ];
         }
-
         DB::table('temp_publish_products')->insert($rows);
-
         $temp_publish_products = DB::table('temp_publish_products')
             ->where('user_id', Auth::User()->id)
             ->where('action', 'publish')
             ->whereIn('id', ImportList::where('id_customer', Auth::User()->id)->pluck('id'))
             ->pluck('payload');
-
-        if (ShopifyBulkPublish::dispatch(Auth::User(), json_decode($temp_publish_products), $published)) {
-            $result = 'ok';
-        }
-
-        return response()->json(['result' => $result]);
+        ShopifyBulkPublish::dispatch(Auth::User(), json_decode($temp_publish_products), $published);
     }
 
     public function checkPublishProducts(Request $request)
     {
-        $this->authorize('view-merchant-import-list');
-
+        $this->authorize('plan_bulk-publish-product-import-list');
         $product_ids = $request->product_ids;
-
         $prods = MyProducts::where('id_customer', Auth::User()->id)
             ->whereIn('id_imp_product', $product_ids)
             ->pluck('id_imp_product', 'id_shopify');
-
-        DB::table('temp_publish_products')
-            ->where('user_id', Auth::User()->id)
-            ->where('action', 'publish')
-            ->whereIn('id', $prods)
-            ->delete();
-
+        DB::table('temp_publish_products')->where('user_id', Auth::user()->id)->where('action', 'publish')->delete();
         return response()->json([
-            'result' => $prods != null,
+            'result' => $prods != null && count($prods) != 0,
             'id_shopify' => $prods != null ? $prods : 0
         ]);
     }

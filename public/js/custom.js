@@ -1221,24 +1221,24 @@ function showMyProducts (products) {
 }
 
 function showImportProducts (data) {
+    $('.empty-product').hide();
     $('.productboxelement').remove()
     var str = '';
     data.products.forEach(product => {
         var image_str = '';
         var button_str = '';
-
-        if (data.plan == 'free') {
-            button_str += `<button data-toggle="modal" data-target="#upgrade-plans-modal" class='delete redbutton' id="delete-${product.id_import_list}" data-id="${product.id_import_list}">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
-                <button class='delete redbutton' id="deleting-${product.id_import_list}" style="display: none;" data-id="${product.id_import_list}">Deleting... <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
-                <button data-toggle="modal" data-target="#upgrade-plans-modal" class='sendto greenbutton btn-import-list-send-${product.id_import_list}' data-id="${product.id_import_list}">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
-                <button class="sendto greenbutton sending btn-import-list-send3 btn-import-list-send3-${product.id_import_list}" data-shopifyid="0" style="display:none">Sending...</button>
-                <button class="sendto edit-in-shopify btn-import-list-send2 btn-import-list-send2-${product.id_import_list}" data-shopifyid="0" style="display:none">Edit in Shopify Store</button>`;
+        if (data.plan == null) {
+            button_str += `<button data-toggle="modal" data-target="#membership-modal" class="delete" id="delete-${product.id_import_list}" data-id="${product.id_import_list}">Delete</button>
+                <button data-toggle="modal" data-target="#membership-modal" class="sendto greenbutton btn-import-list-send-${product.id_import_list}" data-id="${product.id_import_list}">Add to Store</button>`;
+        } else if (data.plan == 'free') {
+            button_str += `<button data-toggle="modal" data-target="#upgrade-plans-modal" class="delete" id="delete-${product.id_import_list}" data-id="${product.id_import_list}">Delete</button>
+                <button data-toggle="modal" data-target="#upgrade-plans-modal" class="sendto greenbutton btn-import-list-send-${product.id_import_list}" data-id="${product.id_import_list}">Add to Store</button>`;
         } else {
-            button_str += `<button class='delete redbutton btn-import-list-delete' data-toggle="modal" data-target="#confirm-modal" id="delete-${product.id_import_list}" data-id="${product.id_import_list}"  data-name="${product.name}" data-sku="${product.sku}" data-img="${product.delete_image_url}">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
-                <button class='delete redbutton' id="deleting-${product.id_import_list}" style="display: none;" data-id="${product.id_import_list}">Deleting... <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
-                <button class='sendto greenbutton btn-import-list-send btn-import-list-send-${product.id_import_list}' data-id="${product.id_import_list}">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
-                <button class="sendto greenbutton sending btn-import-list-send3 btn-import-list-send3-${product.id_import_list}" data-shopifyid="0" style="display:none">Sending...</button>
-                <button class="sendto edit-in-shopify btn-import-list-send2 btn-import-list-send2-${product.id_import_list}" data-shopifyid="0" style="display:none">Edit in Shopify Store</button>`;
+            button_str += `<button class="delete btn-import-list-delete" id="delete-${product.id_import_list}" data-id="${product.id_import_list}" data-name="${product.name}" data-sku="${product.sku}" data-img="${product.delete_image_url}">Delete</button>
+                <button class="sendto greenbutton btn-import-list-send btn-import-list-send-${product.id_import_list}" data-id="${product.id_import_list}" data-name="${product.name}" data-sku="${product.sku}" data-img="${product.delete_image_url}">Add to Store</button>
+                <img src="/img/loading_1.gif" class="import-list-loading-${product.id_import_list}" style="display:none; ">
+                <span id="sent-msg-${product.id_import_list}" class="text-secondary h5 mb-0" style="display:none; cursor: text">Product Added to Store</span>
+                <button class="sendto edit-in-shopify btn-import-list-sent-${product.id_import_list}" data-shopifyid="0">Edit in Store</button>`;
         }
         product.images.forEach((image, i) => {
             image_str += `<div class="selectimage">
@@ -1250,6 +1250,16 @@ function showImportProducts (data) {
                 </div>
             </div>`;
         });
+        var collection_str = `<div id="collection_data${product.id_import_list}">`;
+        product.collections.forEach(collection => {
+            collection_str += `<option value="${collection}">`;
+        });
+        collection_str += '</div>';
+        var type_str = `<div id="type_data${product.id_import_list}">`;
+        product.types.forEach(type => {
+            type_str += `<option value="${type}">`;
+        });
+        type_str += '</div>';
         str += `<div class="productboxelement import-product" id="product${product.id_import_list}" data-id="${product.id_import_list}">
             <h2>${product.name}</h2>
             <div class="producttabs">
@@ -1258,12 +1268,10 @@ function showImportProducts (data) {
                         <input type="checkbox" id="check-${product.id_import_list}" class="checkbox" style="display: block; width: 20px; height: 20px;">
                     </div>
                     <div class="tabs">
-
                         <a href=".tab-1" class="thetab active"> Product </a>
                         <a href=".tab-2" class="thetab"> Description </a>
                         <a href=".tab-3" class="thetab"> Pricing </a>
                         <a href=".tab-4" class="thetab"> Images </a>
-
                     </div>
                     <div class="buttons import-actions">
                         ${button_str}
@@ -1284,29 +1292,29 @@ function showImportProducts (data) {
                                 <div class="editform">
                                     <div class="full">
                                         <label for="">Change product name</label>
-                                        <input type="text" id="name${product.id_import_list}" value='${product.name}'>
+                                        <input type="text" id="name${product.id_import_list}" value="${product.name}">
                                     </div>
                                     <div class="full">
                                         <label for="">Collection <span class="simple-tooltip" title="You can assign the product to a Collection in your Shopify store.">?</span></label>
-                                        <input type="text" list="collection${product.id_import_list}" id="collections${product.id_import_list}" class="collection" data-id="${product.id_import_list}">
+                                        <input type="text" list="collection${product.id_import_list}" id="collections${product.id_import_list}" class="collection" data-id="${product.id_import_list}" value="${product.collection}">
                                         <datalist id="collection${product.id_import_list}">
-                                            <div id="collection_data"></div>
+                                            ${collection_str}
                                         </datalist>
-                                        <span id="collection_error${product.id_import_list}" style="color:red; display:none;">One product have only one type.</span>
+                                        <span id="collection_error${product.id_import_list}" style="color:red; display:none;">One product can have only one collection.</span>
                                     </div>
                                     <div>
                                         <label for="">Type <span class="simple-tooltip" title="You can give this product a classification that will be saved in the 'Product Type' field in Shopify.">?</span></label>
-                                        <input type="text" list="type${product.id_import_list}" id="types${product.id_import_list}" class="type" data-id="${product.id_import_list}">
+                                        <input type="text" list="type${product.id_import_list}" id="types${product.id_import_list}" class="type" data-id="${product.id_import_list}" value="${product.type}">
                                         <datalist id="type${product.id_import_list}">
-                                            <div id="type_data"></div>
+                                            ${type_str}
                                         </datalist>
-                                        <span id="type_error${product.id_import_list}" style="color:red; display:none;">One product have only one type.</span>
+                                        <span id="type_error${product.id_import_list}" style="color:red; display:none;">One product can have only one type.</span>
                                     </div>
                                     <div>
                                         <label for="">Tags <span class="simple-tooltip" title="You can create your own tags separated by commas.">?</span></label>
-                                        <input type="text" list="tag${product.id_import_list}" id="tags${product.id_import_list}" class="tag" data-id="${product.id_import_list}">
+                                        <input type="text" list="tag${product.id_import_list}" id="tags${product.id_import_list}" class="tag" data-id="${product.id_import_list}" value="${product.tags}">
                                         <datalist id="tag${product.id_import_list}">
-                                            <div id="tag_data"></div>
+                                            <div id="tag_data${product.id_import_list}"></div>
                                         </datalist>
                                     </div>
                                 </div>
@@ -1365,19 +1373,19 @@ function showImportProducts (data) {
                                         ${product.weight}
                                     </td>
                                     <td data-label="COST" class="w100">
-                                        <div class="costgrid">
-                                            US$<span id="cost${product.id_import_list}" data-id="${product.id_import_list}">${parseFloat(product.price).toFixed(2)}</span>
+                                        <div class="nowrap">
+                                            US $<span id="cost${product.id_import_list}" data-id="${product.id_import_list}">${parseFloat(product.price).toFixed(2)}</span>
                                         </div>
                                     </td>
                                     <td data-label="PROFIT (%) " class="w100">
                                         <span class="simple-tooltip" title="First tooltip">?</span>
                                         <div class="inpupercent">
-                                            <input type="text" style="width: 50%; text-align:center;" class="box-profit" id="profit${product.id_import_list}" data-id="${product.id_import_list}" value="${data.profit}">%
+                                            <input type="number" min="0" style="width: 60px; text-align:right; padding: 0px 3px;" class="box-profit" id="profit${product.id_import_list}" data-id="${product.id_import_list}" value="${data.profit}">%
                                         </div>
                                     </td>
                                     <td data-label="PRICE" class="w100">
-                                        <div class="inputprice">
-                                            US$<input type="text" style="width: 50%; text-align:center;" class="box-price" id="price${product.id_import_list}" data-price="${product.price}" data-id="${product.id_import_list}" value="${parseFloat(product.price * (100 + data.profit) / 100).toFixed(2)}">
+                                        <div class="inputprice nowrap">
+                                            US $<input type="number" min="0" style="width: 60px; text-align:left; padding: 0px 3px;" class="box-price" id="price${product.id_import_list}" data-price="${product.price}" data-id="${product.id_import_list}" value="${parseFloat(product.price * (100 + data.profit) / 100).toFixed(2)}">
                                         </div>
                                     </td>
                                 </tr>
@@ -1390,14 +1398,28 @@ function showImportProducts (data) {
                         </div>
                     </div>
                 </div>
-
             </div>
-        </div>`
+        </div>
+        <div class="import-list-delete-banner" id="import-list-delete-banner-${product.id_import_list}">
+            <span>"${product.name}" has been removed from import list. <a href="#" class="import-list-undo" data-id="#import-list-delete-banner-${product.id_import_list}" id="${product.id}">Undo</a></span>
+            <button type="button" class="close import-delete-banner">&times;</button>
+        </div>`;
     })
-    $('#import-products').html(str);
-    $(".editor").each(function(index, ele) {
-        CKEDITOR.replace($(ele).attr('id'), {});
-    });
+    if (data.products.length == 0) {
+        $('#pagination').remove();
+        $('#import-products').remove();
+        $('#product-top-menu').remove();
+        $('.empty-product').show();
+    } else {
+        $('#import-products').html(str);
+        $(".editor").each(function(index, ele) {
+            CKEDITOR.replace($(ele).attr('id'), {});
+        });
+        Tipped.create('.simple-tooltip');
+        setTimeout(() => {
+            window.scrollTo(0,0);
+        }, 500);
+    }
 }
 
 function pageNumberClick (page_number) {
@@ -1415,6 +1437,39 @@ function uncheckAllProducts () {
     $('#select-all').show();
     $('#selected-products').text(0);
     $('#selected-products').hide();
+}
+
+function showBulkActionButtons () {
+    let count = 0;
+    $("input.checkbox:checked").each(function(index, ele) {
+        count++;
+    });
+    $('#selected-products').text(count);
+    if ($('#selected-products').text() <= 0) {
+        $('#check-all-products').prop('checked', false);
+        $('#select-all').css('display', 'block');
+        $('#selected-products').css('display', 'none');
+    } else {
+        if (!$('#check-all-products').is(':disabled')) {
+            $('#check-all-products').prop('checked', true);
+            if ($('#selected-products').text() < 10) {
+                $('#selected-products').css('padding', '0px 10px');
+            } else {
+                $('#selected-products').css('padding', '0px 5px');
+            }
+            $('#select-all').css('display', 'none');
+            $('#selected-products').css('display', 'block');
+        }
+    }
+}
+
+function popupFailMsg(msg) {
+    $('body').append('<div id="fade-background"></div>');
+    $('#product-fail-text').html(msg);
+    $('#product-fail').css('display', 'block');
+    setTimeout(() => {
+        $('#product-fail').addClass('show');
+    }, 150);
 }
 
 function setLoading() {

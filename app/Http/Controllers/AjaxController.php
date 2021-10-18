@@ -109,9 +109,13 @@ class AjaxController extends Controller
 
             $this->authorize('plan_delete-product-import-list');
             $row = ImportList::whereIn('id', $parameters['id_import_list']);
+            $result = false;
+            if (count($row->get())) {
+                $result = true;
+            }
             $row->delete();
 
-            return json_encode(1);
+            return json_encode(['result' => $result]);
         }
 
         if ($parameters['action'] == 'update_notes') {
@@ -235,30 +239,40 @@ class AjaxController extends Controller
         }
 
         if ($parameters['action'] == 'import-list') {
-            $this->authorize('plan_delete-product-import-list');
-            $this->authorize('plan_view-my-products');
+            $this->authorize('view-merchant-import-list');
             $page_number = $parameters['page_number'];
             $page_size = $parameters['page_size'];
             $prods = Products::select('products.*', 'import_list.id as id_import_list')
                 ->join('import_list', 'import_list.id_product', '=', 'products.id')
-                ->whereNotIn('import_list.id', MyProducts::where('id_customer', Auth::User()->id)->pluck('id_imp_product'))
-                ->where('import_list.id_customer', Auth::user()->id)->orderBy('import_list.updated_at', 'desc');
+                ->whereNotIn('import_list.id', MyProducts::where('id_customer', Auth::user()->id)->pluck('id_imp_product'))
+                ->where('import_list.id_customer', Auth::user()->id)
+                ->orderBy('import_list.id', 'desc');
 
             $total_count = $prods->count();
+            if (ceil($total_count / $page_size) < $page_number) {
+                $page_number = ceil($total_count / $page_size);
+            }
             $prods = $prods->skip(($page_number - 1) * $page_size)->take($page_size)->get();
             foreach ($prods as $product) {
                 if ($product['images'] != null && count(json_decode($product['images'])) > 0) {
-                    $product['image_url'] = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203' . json_decode($product['images'])[0]->file;
-                    $product['delete_image_url'] = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37c' . json_decode($product['images'])[0]->file;
+                    if (json_decode($product['images'])[0]->file == '') {
+                        $product['image_url'] = '/img/default_image_285.png';
+                        $product['delete_image_url'] = '/img/default_image_75.png';
+                    } else {
+                        $product['image_url'] = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203' . json_decode($product['images'])[0]->file;
+                        $product['delete_image_url'] = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37c' . json_decode($product['images'])[0]->file;
+                    }
                 } else {
-                    $product['image_url'] = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203no_selection';
-                    $product['delete_image_url'] = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37cno_selection';
+                    $product['image_url'] = '/img/default_image_285.png';
+                    $product['delete_image_url'] = '/img/default_image_75.png';
                 }
 
                 $search = new SearchController;
                 $images = [];
                 foreach (json_decode($product['images']) as $image) {
-                    $images[] = env('URL_MAGENTO_IMAGES') . '/3a98496dd7cb0c8b28c4c254a98f915a' . $image->file;
+                    if ($image->file) {
+                        $images[] = env('URL_MAGENTO_IMAGES') . '/3a98496dd7cb0c8b28c4c254a98f915a' . $image->file;
+                    }
                 }
                 $product['description'] = $search->getAttributeByCode($product, 'description');
                 $product['size'] = $search->getAttributeByCode($product, 'size');
@@ -266,6 +280,63 @@ class AjaxController extends Controller
                 $product['ship_height'] = round($search->getAttributeByCode($product, 'ship_height'), 2);
                 $product['ship_width'] = round($search->getAttributeByCode($product, 'ship_width'), 2);
                 $product['ship_length'] = round($search->getAttributeByCode($product, 'ship_length'), 2);
+                $tags = '';
+                if ($product['categories']) {
+                    if (substr($product['categories'], 0, 1) != '[') {
+                        foreach (explode('>', $product['categories']) as $category) {
+                            if (trim($category) != '') {
+                                $tags .= trim($category).', ';
+                            }
+                        }
+                    }
+                }
+                $tags .= explode(':', $product['name'])[0].', ';
+                if (count(explode(':', $product['name'])) > 1) {
+                    $elements = explode(':', $product['name'])[1];
+                    foreach (explode(' ', $elements) as $element) {
+                        $element = trim($element);
+                        $element = str_replace(',', '', $element);
+                        $element = str_replace('+', '', $element);
+                        $element = str_replace('(', '', $element);
+                        $element = str_replace(')', '', $element);
+                        $element = str_replace('-', '', $element);
+                        $element = str_replace('.', '', $element);
+                        $element = str_replace('#', '', $element);
+                        $element = str_replace('&', '', $element);
+                        if (strlen($element) > 2 && !floatval($element)) {
+                            $tags .= $element.', ' ;
+                        }
+                    }
+                }
+                $tags = substr($tags, 0, -2);
+                $product['tags'] = $tags;
+                $type = '';
+                $collection = '';
+                if ($product['categories'] != null) {
+                    if (substr($product['categories'], 0, 1) != '[') {
+                        $elements = explode('>', $product['categories']);
+                        $type = $elements[count($elements) - 1];
+                        $type = trim(str_replace(',', ' &', $type));
+                        if (count($elements) > 1) {
+                            $collection = $elements[count($elements) - 2];
+                        } else {
+                            $collection = $elements[count($elements) - 1];
+                        }
+                        $collection = trim(str_replace(',', ' &', $collection));
+                    }
+                }
+                $product['type'] = $type;
+                $types = DB::table('user_collections_tags_types')
+                ->where([['user_id', Auth::User()->id], ['type', 'C']])
+                ->where('value', 'like', '%'.$type.'%')
+                ->orderBy('value')->pluck('value');
+                $product['types'] = $types;
+                $product['collection'] = $collection;
+                $collections = DB::table('user_collections_tags_types')
+                    ->where([['user_id', Auth::User()->id], ['type', 'X']])
+                    ->where('value', 'like', '%'.$product['collection'].'%')
+                    ->orderBy('value')->pluck('value');
+                $product['collections'] = $collections;
             }
             $settings = Settings::where('id_merchant', Auth::user()->id)->first();
             if ($settings == null) {
@@ -283,6 +354,95 @@ class AjaxController extends Controller
                 'page_size' => $page_size,
                 'page_number' => $page_number
             ]);
+        }
+
+        if ($parameters['action'] == 'import-list-undo') {
+            $row = new ImportList;
+            $row->id_customer = Auth::user()->id;
+            $row->id_product = $parameters['id'];
+            $row->save();
+            $product = Products::select('products.*', 'import_list.id as id_import_list')
+                ->join('import_list', 'import_list.id_product', '=', 'products.id')
+                ->where('import_list.id_customer', Auth::user()->id)
+                ->where('products.id', $parameters['id'])->first();
+            if ($product['images'] != null && count(json_decode($product['images'])) > 0) {
+                $product['image_url'] = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203' . json_decode($product['images'])[0]->file;
+                $product['delete_image_url'] = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37c' . json_decode($product['images'])[0]->file;
+            } else {
+                $product['image_url'] = '/img/default_image_285.png';
+                $product['delete_image_url'] = '/img/default_image_75.png';
+            }
+
+            $search = new SearchController;
+            $images = [];
+            foreach (json_decode($product['images']) as $image) {
+                if ($image->file) {
+                    $images[] = env('URL_MAGENTO_IMAGES') . '/3a98496dd7cb0c8b28c4c254a98f915a' . $image->file;
+                }
+            }
+            $product['description'] = $search->getAttributeByCode($product, 'description');
+            $product['size'] = $search->getAttributeByCode($product, 'size');
+            $product['images'] = $images;
+            $product['ship_height'] = round($search->getAttributeByCode($product, 'ship_height'), 2);
+            $product['ship_width'] = round($search->getAttributeByCode($product, 'ship_width'), 2);
+            $product['ship_length'] = round($search->getAttributeByCode($product, 'ship_length'), 2);
+            $tags = '';
+            if ($product['categories']) {
+                if (substr($product['categories'], 0, 1) != '[') {
+                    foreach (explode('>', $product['categories']) as $category) {
+                        if (trim($category) != '') {
+                            $tags .= trim($category).', ';
+                        }
+                    }
+                }
+            }
+            $tags .= explode(':', $product['name'])[0].', ';
+            if (count(explode(':', $product['name'])) > 1) {
+                $elements = explode(':', $product['name'])[1];
+                foreach (explode(' ', $elements) as $element) {
+                    $element = trim($element);
+                    $element = str_replace(',', '', $element);
+                    $element = str_replace('+', '', $element);
+                    $element = str_replace('(', '', $element);
+                    $element = str_replace(')', '', $element);
+                    $element = str_replace('-', '', $element);
+                    $element = str_replace('.', '', $element);
+                    $element = str_replace('#', '', $element);
+                    $element = str_replace('&', '', $element);
+                    if (strlen($element) > 2 && !floatval($element)) {
+                        $tags .= $element.', ' ;
+                    }
+                }
+            }
+            $tags = substr($tags, 0, -2);
+            $product['tags'] = $tags;
+            $collection = '';
+            if ($product['categories'] != null) {
+                if (substr($product['categories'], 0, 1) != '[') {
+                    $elements = explode('>', $product['categories']);
+                    $collection = $elements[count($elements) - 1];
+                    $collection = trim(str_replace(',', ' &', $collection));
+                }
+            }
+            $product['collection'] = $collection;
+            $collections = DB::table('user_collections_tags_types')
+                ->where([['user_id', Auth::User()->id], ['type', 'C']])
+                ->where('value', 'like', '%'.$collection.'%')
+                ->orderBy('value')->pluck('value');
+            $product['collections'] = $collections;
+            $product['type'] = trim($product['brand']);
+            $types = DB::table('user_collections_tags_types')
+                ->where([['user_id', Auth::User()->id], ['type', 'X']])
+                ->where('value', 'like', '%'.$product['type'].'%')
+                ->orderBy('value')->pluck('value');
+            $product['types'] = $types;
+            $settings = Settings::where('id_merchant', Auth::user()->id)->first();
+            if ($settings == null) {
+                $product['profit'] = 0;
+            } else {
+                $product['profit'] = $settings->set8;
+            }
+            return json_encode($product);
         }
 
         if ($parameters['action'] == 'migration-count') {
