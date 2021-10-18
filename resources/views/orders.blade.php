@@ -1,12 +1,19 @@
 @extends('layouts.app')
 
-
-
 @section('content')
 
 <div class="indexContent" data-page_name="ORDERS">
     <div class="maincontent">
         <div class="wrapinsidecontent">
+            @if($total_count == 0)
+            <div class="no-order">
+                <h2 class="font-weight-bold">Your orders list is empty!</h2>
+                <h4 style="line-height: 1.5;">No orders yet? Go to the Search page to add more products to your import list and get more orders.</h4>
+                <h4 style="line-height: 1.5;">When you get an order, you can manage it here and send it to us for processing.</h4>
+                <a href="/search-products"><button class="btn btn-lg btn-success greenbutton">Go To Search Products</button></a>
+            </div>
+            <div class="order-content">
+            @else
             @if(Auth::user()->plan == 'free')
             <div class="alertan">
                 <div class="agrid">
@@ -41,24 +48,23 @@
             </div>
             @endif
 
-
             <div class="headerorders">
                 <div class="date">
                     Date
                 </div>
                 <div class="dates">
                     <label for="">From</label>
-                    <input type="date" id="date_from" value="{{Request()->from}}">
+                    <input type="date" id="date_from" value="">
                 </div>
                 <div class="dates">
                     <label for="">To:</label>
-                    <input type="date" id="date_to" value="{{Request()->to}}">
+                    <input type="date" id="date_to" value="">
                 </div>
-                <div class="noorder">
-                    Order #
+                <div class="date">
+                    Order Number
                 </div>
                 <div class="search">
-                    <input type="text" id="order_id" value="{{Request()->order}}" placeholder="Order #">
+                    <input type="text" id="order_id" value="" placeholder="Order Number">
                 </div>
                 <div class="paymentstatus">
                     <select id="payment_status" name="selectFS">
@@ -81,26 +87,22 @@
                     </select>
                 </div>
                 <div class="searchbtn">
-                    <button class="btn-order-search searchbutton greenbutton">
-                        <i class="fa fa-search" aria-hidden="true"></i>
-                        Search
-                    </button>
+                    <button class="btn-order-search searchbutton greenbutton cel-icon-search">Search</button>
+                    <span class="mx-3 my-3 btn-link h5 order-reset" style="text-decoration: underline; cursor: pointer;">Reset</span>
                 </div>
             </div>
 
             @if(Auth::user()->plan == 'basic')
             <div class="results">
                 <div><strong>Period</strong></div>
-                <div><label id="period">{{$basic_period}}</label></div>
+                <div><label id="period" class="my-0"></label></div>
                 <div><strong>Total Orders</strong></div>
                 <div>
-                    <span class="font-weight-bold" id="total_period_orders" style="{{($total_period_orders >= env('LIMIT_ORDERS'))?'background-color:red':''}}">{{$total_period_orders}}</span> of <span class="font-weight-bold" id="total_orders">{{$total_count}}</span>
+                    <span class="font-weight-bold" id="total_period_orders"></span> of <span class="font-weight-bold" id="total_orders">{{$total_count}}</span>
                 </div>
             </div>
             <div class="actions">
-                <button class="btn-order-notifications pendingpay mt-5" title="Outstanding orders that require payment"> <span class="badge" id="notifications">{{$notifications}}</span> Pending Payments</button>
-                <div></div>
-                <div></div>
+                <button class="btn-order-notifications pendingpay simple-tooltip" title="Outstanding orders that require payment"> <span class="badge" id="notifications"></span> Pending Payments</button>
             </div>
             <div class="pagesize">
                 <span>Show</span>
@@ -113,7 +115,7 @@
             </div>
             @endif
 
-            <div class="orders">
+            <div class="orders my-0">
                 <table class="greentable tableorders" cellspacing="0">
                     <thead>
                         <tr>
@@ -143,76 +145,21 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody id="order_data">
-                        @if($is_notification && !$notifications)
-                        <div class="alertan level2">
-                            <div class="agrid">
-                                <p><strong>No orders pending payment. Good job!</strong></p>
-                            </div>
-                        </div>
-                        @endif
-                        @foreach($order_list as $ol)
-                        <tr class="productdatarow">
-                            <td data-label="ORDER #">
-                                {{substr($ol->order_number_shopify, 1)}}
-                            </td>
-                            <td data-label="DATE">
-                                {{$ol->created_at}}
-                            </td>
-                            <td data-label="CUSTOMER NAME">
-                                {{$ol->first_name}} {{$ol->last_name}}
-                            </td>
-                            <td data-label="TOTAL TO PAY">
-                                ${{number_format($ol->total + $ol->shipping_price, 2, '.', '')}}
-                            </td>
-                            <td data-label="PAYMENT STATUS">
-                                {{$ol->status1}}
-                            </td>
-                            <td data-label="ORDER STATE">
-                                {{$ol->status2}}
-                            </td>
-                            <td>
-                                @if($ol->financial_status== App\Libraries\OrderStatus::Outstanding && $ol->fulfillment_status != 9 && $ol->fulfillment_status != 12)
-                                <button class="payorder pay-button checkout-button" data-id="{{$ol->id}}">PAY ORDER</button>
-                                @elseif($ol->fulfillment_status == 9)
-                                <button class="payorder payorderoff canceled" data-id="{{$ol->id}}">Canceled</button>
-                                @else
-                                <button class="payorder payorderoff paid" data-id="{{$ol->id}}">Paid</button>
-                                @endif
-                            </td>
-                            <td>
-                                <a href="/orders/{{$ol->id}}"><button class="view greenbutton">VIEW</button></a>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
+                    <tbody id="order_data"></tbody>
                 </table>
             </div>
+            <div id="pagination"></div>
+            </div>
+            @endif
         </div>
     </div>
 </div>
-<div id="pagination"></div>
 <input type="text" id="total_count" value="{{$total_count}}" hidden>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js"></script>
 
 <script type="text/javascript">
     $(document).ready(function() {
         $('#total_count').text("{{$total_count}}");
-
-        if ($('#notifications').text() > 9) {
-            $('#notifications').addClass('circle');
-        } else {
-            $('#notifications').removeClass('circle');
-        }
-        $('#check-all-mp').click(function() {
-            if (!$(this).data('mark')) {
-                $('.checkbox').prop('checked', true);
-                $(this).data('mark', true)
-            } else {
-                $('.checkbox').prop('checked', false);
-                $(this).data('mark', false)
-            }
-        });
 
         $('.btn-order-notifications').click(function() {
             window.location.href = encodeURI('{{url("/orders/")}}?notifications=true');
@@ -227,14 +174,11 @@
         let res = $('input[name=s_method]:checked', '#shipping-methods').val();
         let orders = [$('.checkout-button').attr('data-id')];
 
-        $("input.checkbox:checked").each(function(index, ele) {
-            orders.push($(ele).attr('data-id'));
-        });
-
         console.log('ordenes... ' + orders);
 
         // Create a new Checkout Session using the server-side endpoint you
         // created in step 3.
+        setLoading();
         fetch('/create-checkout-session', {
             headers: {
                 "Content-Type": "application/json",

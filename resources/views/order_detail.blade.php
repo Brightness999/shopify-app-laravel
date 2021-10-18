@@ -1,14 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="indexContent orderDetailContent" data-page_name="ORDER DETAIL">
+<div class="indexContent orderDetailContent" data-page_name="ORDER DETAILS">
     <div class="maincontent">
         <div class="wrapinsidecontent">
-            <a href="{{ url()->previous() }}">
-                <button class="btn btn-lg mx-3 my-2 back">
-                    < BACK
-                </button>
-            </a>
             @if(Auth::user()->plan == 'free')
             <div class="alertan">
                 <div class="agrid">
@@ -35,10 +30,10 @@
                                     <h3>Order Information</h3>
                                     <div class="formg">
                                         <p class="font-weight-bold">Shopify Order Number</p>
-                                        <p>{{substr($order->order_number_shopify, 1)}}</p>
+                                        <p><a href="https://{{$shopify_url}}/admin/orders/{{$order->id_shopify}}" target="_blank">{{substr($order->order_number_shopify, 1)}}</a></p>
                                         @if($order->magento_order_id)
                                         <p class="font-weight-bold">GDS Order</p>
-                                        <p>#{{$order->magento_order_id}}</p>
+                                        <p>{{$order->magento_order_id}}</p>
                                         @endif
                                         <p class="font-weight-bold">Date</p>
                                         <p>{{$order->created_at}}</p>
@@ -107,12 +102,15 @@
                                             </div>
 
                                             @if($order->fulfillment_status== 4)
-                                            <button class="" id="save-address">Save</button>
+                                            <button class="btn btn-sm" id="save-address">Save</button>
                                             @endif
 
                                             <!-- If address was updated -->
                                             @if($osa->update_merchant_id > 0)
-                                            <p class="updated"><strong>Updated 2 </strong> <br>{{$osa->update_date}}.</p>
+                                            <div class="formg">
+                                                <p class="updated font-weight-bold">Updated Date </p>
+                                                <p> {{$osa->update_date}}</p>
+                                            </div>
                                             @endif
                                         </form>
                                     </div>
@@ -156,14 +154,14 @@
                                         </thead>
                                         <tbody>
                                             @foreach($order_products as $op)
-                                            <tr>
+                                            <tr class="order-detail">
                                                 <td>
                                                     <div class="productphoto">
                                                         <img src="{{$op->image_url}}">
                                                     </div>
                                                 </td>
-                                                <td data-label="PRODUCT NAME">{{$op->name}}</td>
-                                                <td data-label="PRICE" class="nowrap">US$ {{$op->price}}</td>
+                                                <td data-label="PRODUCT NAME"><span class="product-name">{{$op->name}}</span></td>
+                                                <td data-label="PRICE" class="nowrap">US ${{$op->price}}</td>
                                                 <td data-label="QUANTITY">{{$op->quantity}}</td>
                                                 <td class="sku" data-label="SKU">{{$op->sku}}</td>
                                             </tr>
@@ -175,19 +173,19 @@
                                         <tbody>
                                             <tr>
                                                 <td class="font-weight-bold">SUB TOTAL</td>
-                                                <td>${{$mg_order ? number_format($mg_order->subtotal, 2) : number_format($order->total, 2)}}</td>
+                                                <td>US ${{$mg_order ? number_format($mg_order->subtotal, 2) : number_format($order->total, 2)}}</td>
                                             </tr>
                                             <tr>
                                                 <td class="font-weight-bold">SHIPPING & HANDLING</td>
-                                                <td>${{$mg_order ? number_format($mg_order->shipping_amount, 2) : number_format($order->shipping_price, 2)}}</td>
+                                                <td>US ${{$mg_order ? number_format($mg_order->shipping_amount, 2) : number_format($order->shipping_price, 2)}}</td>
                                             </tr>
                                             <tr>
                                                 <td class="font-weight-bold">STORE CREDIT</td>
-                                                <td>${{$mg_order ? number_format($mg_order->grand_total - $mg_order->subtotal - $mg_order->shipping_amount, 2) : 0}}</td>
+                                                <td>US ${{$mg_order ? number_format($mg_order->grand_total - $mg_order->subtotal - $mg_order->shipping_amount, 2) : 0}}</td>
                                             </tr>
                                             <tr class="border-top">
                                                 <td class="font-weight-bold">GRAND TOTAL</td>
-                                                <td>${{$mg_order ? number_format($mg_order->grand_total, 2) : $order->total + $order->shipping_price}}</td>
+                                                <td>US ${{$mg_order ? number_format($mg_order->grand_total, 2) : $order->total + $order->shipping_price}}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -200,7 +198,7 @@
                                     <button class="cancel my-1" id="cancel-req-button" data-toggle="modal" data-target="#confirm-modal" data-id="{{$order->id}}">Cancel Request</button>
                                     @endif
                                     @if($order->financial_status== App\Libraries\OrderStatus::Outstanding && ($order->fulfillment_status != 9 && $order->fulfillment_status != 12))
-                                    <button class="payments my-1" id="checkout-button" data-id="{{$order->id}}">Pay Order</button>
+                                    <button class="btn btn-sm payments my-1" id="checkout-button" data-id="{{$order->id}}">Pay Order</button>
                                     @endif
                                 </div>
                             </div>
@@ -249,49 +247,51 @@
         })
 
         var checkoutButton = document.getElementById('checkout-button');
-        checkoutButton.addEventListener('click', function() {
-            var stripe = Stripe('{{env("STRIPE_API_KEY")}}');
-            let orders = [$(this).attr('data-id')];
-            console.log('ordenes... ' + orders);
+        if (checkoutButton) {
+            checkoutButton.addEventListener('click', function() {
+                var stripe = Stripe('{{env("STRIPE_API_KEY")}}');
+                let orders = [$(this).attr('data-id')];
+                console.log('ordenes... ' + orders);
 
-            fetch('/create-checkout-session', {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json, text-plain, */*",
-                        "X-Requested-With": "XMLHttpRequest",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                    },
-                    method: 'POST',
-                    body: JSON.stringify({
-                        orders: orders
-                        //shipping: $('input[name=s_method]:checked', '#shipping-methods').val(),
-                    }),
-                })
-                .then(function(response) {
-                    if (response.status == 406) {
-                        $('#order-limit-modal').modal('show')
-                    }
-                    return response.json();
-                })
-                .then(function(session) {
-                    return stripe.redirectToCheckout({
-                        sessionId: session.id
-                    }).then(function(result) {
-                        console.log('res', result);
+                fetch('/create-checkout-session', {
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json, text-plain, */*",
+                            "X-Requested-With": "XMLHttpRequest",
+                            "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                        },
+                        method: 'POST',
+                        body: JSON.stringify({
+                            orders: orders
+                            //shipping: $('input[name=s_method]:checked', '#shipping-methods').val(),
+                        }),
+                    })
+                    .then(function(response) {
+                        if (response.status == 406) {
+                            $('#order-limit-modal').modal('show')
+                        }
+                        return response.json();
+                    })
+                    .then(function(session) {
+                        return stripe.redirectToCheckout({
+                            sessionId: session.id
+                        }).then(function(result) {
+                            console.log('res', result);
+                        });
+                    })
+                    .then(function(result) {
+                        // If `redirectToCheckout` fails due to a browser or network
+                        // error, you should display the localized error message to your
+                        // customer using `error.message`.
+                        if (result.error) {
+                            alert(result.error.message);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error:', error);
                     });
-                })
-                .then(function(result) {
-                    // If `redirectToCheckout` fails due to a browser or network
-                    // error, you should display the localized error message to your
-                    // customer using `error.message`.
-                    if (result.error) {
-                        alert(result.error.message);
-                    }
-                })
-                .catch(function(error) {
-                    console.error('Error:', error);
-                });
-        });
+            });
+        }
     });
 </script>
 

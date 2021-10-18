@@ -630,30 +630,31 @@ $(document).ready(function () {
         getMerchantData();
     });
 
+    $('.order-reset').click(function() {
+        $('#date_from').val('');
+        $('#date_to').val('');
+        $('#order_id').val('');
+        $('#payment_status').val('0');
+        $('#order_state').val('0');
+        getUserOrderData();
+    })
+
     $(".btn-order-search").click(function() {
         var flag = orderSearchPermission();
         if (flag) {
-            var urlParams = new URLSearchParams(window.location.search);
-            var notifications = urlParams.getAll('notifications');
-            var parameters = {
-                action: getAction(),
-                page_size: $('#page_size').val(),
-                page_number: 1,
-                from: $('#date_from').val(),
-                to: $('#date_to').val(),
-                order_number: $('#order_id').val().trim(),
-                payment_status: $('#payment_status').val(),
-                order_state: $('#order_state').val(),
-                notifications: notifications[0]
-            }
-            $.getJSON(ajax_link, parameters, function(res) {
-                console.log(res);
-                pagination(res);
-                showMyOrders(res.my_orders);
-            });
+           getUserOrderData(); 
         }
-
     });
+
+    $('#merge-close').click(function() {
+        $('#migrate-products-modal').removeClass('show');
+        $('.bodyFront').removeClass('modal-open');
+        $('.bodyFront').css('padding-right', 0);
+        setTimeout(() => {
+            $('#migrate-products-modal').css('display', 'none');
+            $('.modal-backdrop.fade.show').remove();
+        }, 150);
+    })
 
     $(window).scroll(function () {
         if ($(this).scrollTop() > 1000) {
@@ -704,72 +705,124 @@ function orderSearchPermission() {
     if (from != '' && to != '') {
         if (moment(from).isAfter(moment(to).format('YYYY-MM-DD'))) {
             flag = false;
-            $('#confirm-modal-body').html(`<h5>Invalid date range</h5>`);
-            $('#confirm-modal-footer').hide();
+            $('#confirm-modal-body').html(`<h5 class="my-0">Invalid date range</h5>`);
+            $('#cancel').hide();
+            $('#confirm').text('Confirm');
             $('.btn-order-search').attr('data-toggle', 'modal');
             $('.btn-order-search').attr('data-target', '#confirm-modal');
         } else {
             $('.btn-order-search').attr('data-toggle', '');
         }
+    } else {
+        $('.btn-order-search').attr('data-toggle', '');
     }
     return flag;
 }
 
-function showMyOrders (data) {
-    let str = '';
-    console.log(data);
-    if (data.from && data.to) {
-        $('#period').text(`${data.from} - ${data.to}`);
-    } else {
-        $('#period').text(data.basic_period);
+function getUserOrderData () {
+    var urlParams = new URLSearchParams(window.location.search);
+    var notifications = urlParams.getAll('notifications');
+    var parameters = {
+        action: getAction(),
+        page_size: $('#page_size').val(),
+        page_number: 1,
+        from: $('#date_from').val(),
+        to: $('#date_to').val(),
+        order_number: $('#order_id').val().trim(),
+        payment_status: $('#payment_status').val(),
+        order_state: $('#order_state').val(),
+        notifications: notifications[0]
     }
+    $.getJSON(ajax_link, parameters, function(res) {
+        pagination(res);
+        showMyOrders(res.my_orders);
+    });
+}
 
-    $('#total_period_orders').text(data.total_period_orders);
-    $('#total_orders').text(data.order_count);
-    data.orders.forEach(order => {
-        let button_str = '';
-        if (order.financial_status == 1 && order.fulfillment_status != 9 && order.fulfillment_status != 12) {
-            button_str = `<button class="payorder pay-button checkout-button" data-id="${order.id}" data-toggle="modal" data-target="#confirm-modal">PAY ORDER</button>`;
-        } else if (order.fulfillment_status == 9) {
-            button_str = `<button class="payorder payorderoff canceled" data-id="${order.id}">Canceled</button>`;
+function showMyOrders (data) {
+    if (data.orders.length) {
+        $('.no-order').hide();
+        $('.order-content').show();
+        let str = '';
+        if (data.from && data.to) {
+            $('#period').text(`${data.from} - ${data.to}`);
         } else {
-            button_str = `<button class="payorder payorderoff paid" data-id="${order.id}">Paid</button>`;
+            $('#period').text(data.basic_period);
         }
 
-        str += `<tr class="productdatarow">
-            <td data-label="ORDER #">
-                ${order.order_number_shopify.substr(1)}
-            </td>
-            <td data-label="DATE">
-                ${order.created_at}
-            </td>
-            <td data-label="CUSTOMER NAME">
-                ${order.first_name} ${order.last_name}
-            </td>
-            <td data-label="TOTAL TO PAY">
-                $${parseFloat(order.total + order.shipping_price).toFixed(2)}
-            </td>
-            <td>
-                <div class="buttonge">
+        $('#total_period_orders').text(data.total_period_orders);
+        if (data.total_period_orders >= data.limit_orders) {
+            $('#total_period_orders').css('background-color', 'red');
+            $('#total_period_orders').css('color', 'white');
+            $('#total_period_orders').css('border-radius', '50%');
+            if (data.total_period_orders < 10) {
+                $('#total_period_orders').css('padding', '5px 8px');
+            } else {
+                $('#total_period_orders').css('padding', '5px 3px');
+            }
+        }
+        $('#total_orders').text(data.total_count);
+        data.orders.forEach(order => {
+            let button_str = '';
+            if (order.financial_status == 1 && order.fulfillment_status != 9 && order.fulfillment_status != 12) {
+                button_str = `<button class="payorder pay-button checkout-button" data-id="${order.id}">PAY ORDER</button>`;
+            } else if (order.fulfillment_status == 9) {
+                button_str = `<div class="text-center"><span style="color: #929292">Canceled</span></div>`;
+            } else {
+                button_str = `<div class="text-center"><span class="font-weight-bold" style="color: #1A6E33">Paid</span></div>`;
+            }
+
+            str += `<tr class="productdatarow">
+                <td data-label="ORDER #">
+                    ${order.order_number_shopify.substr(1)}
+                </td>
+                <td data-label="DATE">
+                    ${order.created_at}
+                </td>
+                <td data-label="CUSTOMER NAME">
+                    ${order.first_name} ${order.last_name}
+                </td>
+                <td data-label="TOTAL TO PAY">
+                    $${parseFloat(order.total + order.shipping_price).toFixed(2)}
+                </td>
+                <td data-label="PAYMENT STATUS">
                     ${order.status1}
-                </div>
-            </td>
-            <td>
-                <div class="buttonge">
+                </td>
+                <td data-label="ORDER STATE">
                     ${order.status2}
+                </td>
+                <td>
+                    ${button_str}
+                </td>
+                <td>
+                    <a href="/orders/${order.id_shopify}" target="_blank"><button class="view greenbutton">View</button></a>
+                </td>
+            </tr>`;
+        });
+        $('.productdatarow').remove();
+        if (data.is_notification && !data.notifications) {
+            $('.orders').html(`<div class="alertan level2">
+                <div class="agrid">
+                    <p><strong>No orders pending payment. Good job!</strong></p>
                 </div>
-            </td>
-            <td>
-                ${button_str}
-            </td>
-            <td>
-                <a href="/orders/${order.id}"><button class="view greenbutton">VIEW</button></a>
-            </td>
-        </tr>`;
-    });
-    $('.productdatarow').remove();
-    $('#order_data').html(str);
-    $('#notifications').text(data.notifications);
+            </div>`);
+        } else {
+            $('#order_data').html(str);
+            setTimeout(() => {
+                window.scrollTo(0,0);
+            }, 500);
+        }
+        $('#notifications').text(data.notifications);
+        if ($('#notifications').text() > 9) {
+            $('#notifications').addClass('circle');
+        } else {
+            $('#notifications').removeClass('circle');
+        }
+
+    } else {
+        $('.order-content').hide();
+        $('.no-order').show();
+    }
 }
 
 function getMerchantData() {

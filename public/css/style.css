@@ -1648,33 +1648,18 @@ svg {
   color: #6a6c6f;
   margin: 0;
 }
-@media (max-width: 1200px) {
-  .pagetitle {
-    font-size: 23px;
-  }
-}
-.greentable, .resumetable {
+.resumetable {
   width: 100%;
   background-color: #ffffff;
 }
 .greentable {
+  width: 100%;
+  background-color: #ffffff;
   border: solid 1px #d7e0f1;
-  margin-bottom: 60px;
-  margin-top: 20px;
-}
-@media (max-width: 1200px) {
-  .greentable {
-    background-color: transparent;
-    border: none;
-  }
+  margin: 40px 0px;
 }
 .greentable .w100 {
   width: 156px;
-}
-@media (max-width: 1200px) {
-  .greentable .w100 {
-    width: auto;
-  }
 }
 .greentable .skutd {
   width: 130px;
@@ -1684,27 +1669,12 @@ svg {
     background: transparent;
     text-align: center;
 }
-@media (max-width: 1200px) {
-  .greentable .skutd {
-    width: auto;
-  }
-}
 .greentable .skutd input {
   max-width: unset !important;
-}
-@media (max-width: 1200px) {
-  .greentable .skutd input {
-    max-width: 100px !important;
-  }
 }
 .greentable thead {
   background-color: #f7f9fc;
   vertical-align: middle;
-}
-@media (max-width: 1200px) {
-  .greentable thead {
-    display: none;
-  }
 }
 .greentable thead th {
   padding: 20px;
@@ -1732,9 +1702,34 @@ svg {
 .greentable tr .nowrap {
   white-space: nowrap;
 }
+.nowrap {
+  white-space: nowrap;
+}
 @media (max-width: 1200px) {
+  .greentable {
+    background-color: transparent;
+    border: none;
+  }
+  .pagetitle {
+    font-size: 23px;
+  }
+  .greentable .w100 {
+    width: auto;
+  }
+  .greentable .skutd {
+    width: auto;
+  }
+  .greentable .skutd input {
+    max-width: 100px !important;
+  }
+  .greentable thead {
+    display: none;
+  }
   .greentable tbody tr {
     display: block;
+  }
+  .greentable tbody tr.order-detail {
+    margin-bottom: 20px;
   }
   .greentable tbody tr.productdatarow, .greentable tbody tr.orderrow, .greentable tbody tr.merchantrow, .greentable tbody tr.userdatarow {
     margin-top: 40px;
@@ -1744,7 +1739,7 @@ svg {
   }
 }
 .greentable tbody tr td, .resumetable tbody tr td {
-  padding: 20px;
+  padding: 10px;
   font-family: Roboto;
   font-size: 18px;
   font-weight: normal;
@@ -1756,19 +1751,30 @@ svg {
   color: #6a6c6f;
   min-height: 38px;
 }
+.greentable tbody tr.order-detail td:first-child {
+  padding: 0px;
+}
+.greentable tbody tr.order-detail td .product-name {
+  text-align: left;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .greentable tbody tr td {
   border-bottom: solid 1px #d7e0f1;
 }
-.greentable tbody tr td.pimage {
-  width: 97px;
+.greentable.my-products tbody tr td {
+  padding: 10px;
 }
-@media (max-width: 1600px) {
-  .greentable tbody tr td, .resumetable tbody tr td {
-    font-size: 13px;
-  }
+.greentable tbody tr td.pimage {
+  width: 90px;
+  height: 90px;
+  padding: 0px;
 }
 @media (max-width: 1560px) {
   .greentable tbody tr td, .resumetable tbody tr td {
+    font-size: 1rem;
     padding: 10px;
   }
 }
@@ -1777,12 +1783,46 @@ svg {
   padding-top: 5px;
   padding-bottom: 5px;
 }
+.greentable tbody tr td#action {
+  width: 151px;
+}
+.greentable tbody tr td.action-buttons {
+  width: 320px;
+}
+.greentable tbody tr td.action-buttons .viewbutton {
+  width: 45%;
+  min-width: 135px;
+}
+.greentable tbody tr td.action-buttons .deletebutton {
+  width: 45%;
+  min-width: 135px;
+}
+.greentable tbody tr td.product-name a, .greentable tbody tr td.product-name span {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 @media (max-width: 1200px) {
   .greentable tbody tr td {
     display: block;
     text-align: right;
     border: solid 1px #d7e0f1;
     background-color: #ffffff;
+  }
+  .greentable tbody tr.order-detail td .product-name {
+    text-align: right;
+  }
+  .greentable tbody tr td.action-buttons {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+  .greentable tbody tr td.action-buttons img {
+    margin: 0px !important;
+  }
+  .greentable tbody tr td.product-name {
+    text-align: right !important;
   }
   .greentable tbody tr #action {
     display: flex;
@@ -1802,7 +1842,7 @@ svg {
     width: 100%;
   }
   .greentable tbody tr td.pimage img {
-    max-width: 11%;
+    width: 80px;
   }
 }
 .greentable tbody tr .sku {
@@ -1821,18 +1861,17 @@ svg {
   text-align: center;
   color: #ffffff;
   text-decoration: none;
-  display: grid;
-  height: 34px;
-  padding: 5px;
-  padding-left: 20px;
-  padding-right: 40px;
+  height: 43px;
+  padding: 0px 40px 0px 20px;
   align-content: center;
   background-image: url(/img/view.png);
   background-repeat: no-repeat;
-  background-position: right 10px center;
+  background-position: right 20px center;
   border-radius: 10px;
   border: none;
   cursor: pointer;
+  width: 90%;
+  max-width: 224px;
 }
 .greentable tbody .viewbutton:hover {
   background-color: #42b253;
@@ -1852,28 +1891,26 @@ svg {
   }
 }
 .greentable tbody .deletebutton, .myproducts .alldeletebutton {
-  background-color: #f39ca2;
+  background-color: #F72525;
   font-family: Roboto;
   font-size: 18px;
   text-align: center;
   color: #ffffff;
   text-decoration: none;
-  display: grid;
-  height: 34px;
-  padding: 5px;
-  padding-left: 20px;
-  padding-right: 40px;
-  align-content: center;
+  height: 43px;
+  padding: 0px 40px 0px 20px;
+  align-items: center;
   background-image: url(/img/delete.png);
   background-repeat: no-repeat;
-  background-position: right 10px center;
+  background-position: right 20px center;
   border-radius: 10px;
   border: none;
   cursor: pointer;
-  width: 135px;
+  width: 90%;
+  max-width: 224px;
 }
 .greentable tbody .deletebutton:hover {
-  background-color: #ee949a;
+  background-color: #E10000;
 }
 .merchant-search {
     padding-left: 10px;
@@ -1897,7 +1934,8 @@ svg {
     height: 40px;
     border-radius: 4px;
     font-size: 16px;
-    margin-left: 20px;
+    margin-left: 10px;
+    padding: 0px 5px;
 }
 @media (max-width: 1460px) {
   .greentable tbody .deletebutton {
@@ -1910,9 +1948,11 @@ svg {
   }
 }
 .greentable tbody .productphoto {
-  border: solid 1px #d7e0f1;
   padding: 5px;
   box-sizing: border-box;
+}
+.greentable tbody .productphoto img {
+  height: 80px;
 }
 .greentable tbody .productlisthow {
   display: grid;
@@ -1946,7 +1986,7 @@ svg {
 }
 .greentable tbody .productlisthow .productdata .price {
   text-align: left;
-  font-size: 31.5px;
+  font-size: 27px;
   font-weight: bold;
   color: #44b955;
   margin: 0;
@@ -1954,7 +1994,7 @@ svg {
 }
 @media (max-width: 1200px) {
   .greentable tbody .productlisthow .productdata .price {
-    font-size: 22px;
+    font-size: 18px;
   }
 }
 .greentable tbody .productlisthow .productdata p {
@@ -1973,8 +2013,7 @@ svg {
 }
 .greentable tbody .productlisthow .productdata .pbuttons {
   display: grid;
-  grid-template-columns: minmax(auto, 230px) minmax(auto, 230px);
-  column-gap: 20px;
+  grid-template-columns: minmax(auto, 230px);
   margin-top: 15px;
 }
 @media (max-width: 945px) {
@@ -1988,54 +2027,24 @@ svg {
   font-size: 19px;
   font-weight: bold;
   text-align: center;
-  color: #ffffff;
-  background-color: #44b955;
+  color: #44b955;
+  background-color: #ffffff;
   text-decoration: none;
-  display: grid;
   min-height: 42px;
-  padding: 5px;
-  padding-left: 10px;
-  padding-right: 40px;
+  padding: 0px;
   align-content: center;
-  background-image: url(/img/edit.png);
-  background-repeat: no-repeat;
-  background-position: right 8px center;
   box-sizing: border-box;
   border-radius: 10px;
-  border: none;
+  border: solid 1px #44b955;
+  cursor: pointer;
 }
-.greentable tbody .productlisthow .productdata .pbuttons .edit:hover {
-  background-color: #42b253;
+.greentable tbody .productlisthow .productdata .pbuttons .edit:focus {
+  border: solid 1px #44b955;
+  outline: none;
 }
 @media (max-width: 1200px) {
   .greentable tbody .productlisthow .productdata .pbuttons .edit {
     font-size: 14px;
-  }
-}
-.greentable tbody .productlisthow .productdata .pbuttons .delete {
-  font-family: Roboto;
-  font-size: 19px;
-  font-weight: bold;
-  text-align: center;
-  color: #ffffff;
-  background-color: #f39ca2;
-  text-decoration: none;
-  display: grid;
-  min-height: 42px;
-  padding-left: 10px;
-  padding-right: 40px;
-  align-content: center;
-  background-image: url(/img/delete.png);
-  background-repeat: no-repeat;
-  background-position: right 25px center;
-  box-sizing: border-box;
-  border-radius: 10px;
-  border: none;
-}
-@media (max-width: 1200px) {
-  .greentable tbody .productlisthow .productdata .pbuttons .delete {
-    font-size: 14px;
-    background-position: right 37px center;
   }
 }
 #pagination1 {
@@ -2074,7 +2083,7 @@ svg {
 }
 .sendtoshopify {
   display: grid;
-  grid-template-columns: 21px 1fr;
+  grid-template-columns: minmax(70px, auto) 1fr;
   column-gap: 15px;
   align-items: center;
 }
@@ -2082,6 +2091,20 @@ svg {
   width: 21px;
   height: 21px;
   border: solid 1px #e1e9ec;
+}
+.sendtoshopify .checksend {
+  display: flex;
+  align-items: center;
+}
+.sendtoshopify .checksend #selected-products {
+  display: none;
+  font-size: 21px;
+  margin-left: 10px;
+  color: #fff;
+  background: #44b955;
+  border-radius: 50%;
+  padding: 0px 5px;
+  cursor: default;
 }
 .sendtoshopify button, .migrate-products button {
   display: grid;
@@ -2118,19 +2141,22 @@ svg {
   border: none;
   outline: none;
 }
-.migrate-products #check-all-mp {
-    min-width: 20px;
-    height: 20px;
-    margin: 10px;
+.migrate-products #check-all-products {
+  min-width: 20px;
+  height: 20px;
+  margin: 10px;
 }
-@media (min-width: 1220px) {
-  .migrate-products .box-profit {
-    width: 100%;
-  }
-  .migrate-products #profit {
+@media (min-width: 1200px) {
+  .migrate-products #profit, .migrate-products #price {
     display: flex;
     justify-content: center;
   }
+}
+.migrate-products #profit input {
+  width: 50px;
+}
+.migrate-products #price input {
+  width: 60px;
 }
 .sendtoshopify button  img {
   display: inline-block;
@@ -2143,21 +2169,59 @@ svg {
     text-align: center;
   }
 }
+.btn-import-actions {
+  display: flex;
+}
 @media (max-width: 600px) {
   .sendtoshopify button {
     font-size: 15px;
   }
-}
-.btn-import-actions {
-  display: flex;
-}
-@media (max-width: 500px) {
   .btn-import-actions {
     flex-direction: column;
   }
 }
+@media (max-width: 720px) {
+  .migration-menu .btn-import-actions {
+    flex-direction: column;
+  }
+
+  .migration-menu .btn-import-actions button {
+    max-width: 224px;
+    margin: 5px 0px;
+    flex: 0;
+  }
+}
+
+.import-list-delete-banner {
+  background: #ffdcdf;
+  border: solid 1px #fc9c93;
+  padding: 10px;
+  margin: 50px 0px;
+  display: none;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.import-list-delete-banner span {
+  font-size: 21px;
+}
+
+.import-list-delete-banner button {
+  margin-left: 1rem;
+}
+
+.import-list-delete-banner button:focus {
+  border: none;
+  outline: none;
+}
+
+.import-list-delete-banner span a {
+  text-decoration: underline;
+  color: #212529;
+}
+
 .productboxelement {
-  margin-bottom: 100px;
+  margin-bottom: 40px;
 }
 .productboxelement h2 {
   font-family: Roboto;
@@ -2184,7 +2248,7 @@ svg {
 }
 .productboxelement .producttabs .headertabs {
   display: grid;
-  grid-template-columns: minmax(auto, 93px) auto auto;
+  grid-template-columns: 8% 50% 42%;
 }
 @media (max-width: 1220px) {
   .productboxelement .producttabs .headertabs {
@@ -2268,24 +2332,13 @@ svg {
 }
 .productboxelement .producttabs .headertabs .buttons {
   display: flex;
-  grid-template-columns: minmax(auto, 177px) minmax(auto, 246px);
-  grid-template-rows: minmax(42px, auto);
   align-content: center;
-  column-gap: 23px;
   justify-content: center;
-  padding-right: 26px;
-  padding-left: 26px;
+  padding: 0px 10px;
   border-bottom: solid 1px #d7e0f1;
-  cursor: pointer;
   align-items: center;
 }
 @media (max-width: 500px) {
-  .productboxelement .producttabs .headertabs .buttons {
-    flex-direction: column;
-    justify-content: space-evenly;
-  }
-}
-@media (min-width: 800px) {
   .productboxelement .producttabs .headertabs .buttons {
     flex-direction: column;
     justify-content: space-evenly;
@@ -2310,23 +2363,15 @@ svg {
 @media (max-width: 1220px) {
   .productboxelement .producttabs .headertabs .buttons {
     order: 2;
-    grid-template-columns: 1fr 1fr;
     padding-top: 10px;
     padding-bottom: 10px;
+    justify-content: space-evenly;
   }
 }
-/* @media (max-width: 440px) {
-  .productboxelement .producttabs .headertabs .buttons {
-    grid-template-columns: 1fr;
-    grid-row-gap: 23px;
-  }
-} */
 .productboxelement .producttabs .headertabs .buttons .sendto {
   background-color: #44b955;
-  align-content: center;
+  align-items: center;
   border: none;
-  padding: 8px;
-  padding-left: 20px;
   font-family: Roboto;
   font-size: 16px;
   font-weight: bold;
@@ -2336,11 +2381,18 @@ svg {
   padding-right: 20px;
   text-decoration: none;
   border-radius: 10px;
-  /* margin: 5px 0; */
   cursor: pointer;
   display: flex;
   justify-content: center;
   min-height: 43px;
+  min-width: 200px;
+  padding: 0px;
+}
+.productboxelement .producttabs .headertabs .buttons .sendto.btn-import-list-send {
+  background-image: url(/img/edit.png);
+  background-repeat: no-repeat;
+  background-position: right 20px center;
+  padding: 0px 40px 0px 20px;
 }
 .productboxelement .producttabs .headertabs .buttons .sendto:hover {
   background-color: #42b253;
@@ -2359,6 +2411,10 @@ svg {
   background-color: #fff;
   color: #44b955;
   border: 1px solid #44b955;
+  display: none;
+}
+.productboxelement .producttabs .headertabs .buttons .sendto.edit-in-shopify:focus {
+  outline: none;
 }
 @media (max-width: 600px) {
   .productboxelement .producttabs .headertabs .buttons .sendto {
@@ -2366,12 +2422,9 @@ svg {
   }
 }
 .productboxelement .producttabs .headertabs .buttons .delete {
-  background-color: #f39ca2;
-  align-content: center;
+  background-color: #F72525;
+  align-items: center;
   border: none;
-  padding: 8px;
-  padding-left: 20px;
-  padding-right: 20px;
   font-family: Roboto;
   font-size: 16px;
   font-weight: bold;
@@ -2384,9 +2437,18 @@ svg {
   display: flex;
   justify-content: center;
   min-height: 43px;
+  background-image: url(/img/delete.png);
+  background-repeat: no-repeat;
+  background-position: right 20px center;
+  padding: 0px 40px 0px 20px;
+  min-width: 200px;
 }
 .productboxelement .producttabs .headertabs .buttons .delete:hover {
-  background-color: #ee949a;
+  background-color: #E10000;
+}
+.productboxelement .producttabs .headertabs .buttons .delete:focus {
+  border: none;
+  outline: none;
 }
 .migrate-products #migrate-actions {
   display: flex;
@@ -2407,11 +2469,9 @@ svg {
     max-width: 450px;
   }
 }
-@media (min-width: 500px) {
-  .productboxelement .producttabs .headertabs .buttons .delete, .productboxelement .producttabs .headertabs .buttons .sendto, .sendtoshopify button, .migrate-products button {
+@media (min-width: 600px) {
+  .sendtoshopify button {
     flex: 0 1 224px;
-    margin-top: 5px;
-    margin-bottom: 5px;
   }
 }
 @media (min-width: 800px) {
@@ -2424,23 +2484,20 @@ svg {
   }
 }
 @media (min-width: 860px) {
-  .productboxelement .producttabs .headertabs .buttons .delete, .productboxelement .producttabs .headertabs .buttons .sendto, .sendtoshopify button, .migrate-products button {
+  .productboxelement .producttabs .headertabs .buttons .delete, .productboxelement .producttabs .headertabs .buttons .sendto, .sendtoshopify button {
     flex: 0 1 224px;
   }
 }
 @media (min-width: 1220px) {
-  .productboxelement .producttabs .headertabs .buttons .delete, .productboxelement .producttabs .headertabs .buttons .sendto, .migrate-products button {
+  .productboxelement .producttabs .headertabs .buttons .delete, .productboxelement .producttabs .headertabs .buttons .sendto {
     flex: 0 1 0px;
     width: 100%;
     margin-top: 0px;
     margin-bottom: 0px;
   }
-  .migrate-products button {
-    flex: 0 1 224px;
-  }
 }
 @media (min-width: 1510px) {
-  .productboxelement .producttabs .headertabs .buttons .delete, .productboxelement .producttabs .headertabs .buttons .sendto, .sendtoshopify button, .migrate-products button {
+  .sendtoshopify button {
     flex: 0 1 224px;
   }
 }
@@ -2568,7 +2625,6 @@ svg {
 }
 .productboxelement .producttabs .contenttabs .greentable thead th {
   height: 65px;
-  vertical-align: middle;
 }
 .productdatarow .skutd input {
     min-width: 150px !important;
@@ -2590,6 +2646,8 @@ svg {
     display: block;
     float: left;
     margin-left: 6px;
+    margin-top: 2px;
+    padding: 0px 5px;
   }
 }
 .productboxelement .producttabs .contenttabs .greentable input {
@@ -2604,8 +2662,6 @@ svg {
 .productboxelement .producttabs .contenttabs .greentable .costgrid {
   display: flex;
   justify-content: center;
-  grid-template-columns: 10px 1fr;
-  column-gap: 5px;
 }
 @media (max-width: 1200px) {
   .productboxelement .producttabs .contenttabs .greentable .costgrid {
@@ -2616,8 +2672,7 @@ svg {
 .productboxelement .producttabs .contenttabs .greentable .inpupercent {
   display: flex;
   justify-content: center;
-  grid-template-columns: 1fr 10px;
-  column-gap: 5px;
+  align-items: center;
 }
 @media (max-width: 1200px) {
   .productboxelement .producttabs .contenttabs .greentable .inpupercent {
@@ -2630,8 +2685,7 @@ svg {
 .productboxelement .producttabs .contenttabs .greentable .inputprice {
   display: flex;
   justify-content: center;
-  grid-template-columns: 10px 1fr;
-  column-gap: 5px;
+  align-items: center;
 }
 @media (max-width: 1200px) {
   .productboxelement .producttabs .contenttabs .greentable .inputprice {
@@ -2744,11 +2798,11 @@ svg {
     grid-column: span 2;
   }
   .headerorders .paymentstatus {
-    grid-column: span 3;
+    grid-column: span 2;
     display: flex;
   }
   .headerorders .orderstate {
-    grid-column: span 3;
+    grid-column: span 1;
     display: flex;
   }
   .headerorders .searchbtn {
@@ -2804,7 +2858,7 @@ select {
 .headerorders select {
   border: 1px solid #dce4f3;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 1rem;
   color: #6a6c6f;
   height: 36px;
   width: 100%;
@@ -2847,7 +2901,7 @@ select {
   }
 }
 @media (max-width: 900px) {
-  .headerorders .noorder, .headerorders .paymentlabel, .headerorders .orderlabel {
+  .headerorders .noorder {
     display: none;
   }
 }
@@ -2887,8 +2941,11 @@ select {
   box-sizing: border-box;
   padding-left: 15px;
   padding-right: 15px;
-  border-radius: 10px;
+  border-radius: 4px;
   cursor: pointer;
+}
+.headerorders .searchbutton::before {
+  margin: 0px 5px;
 }
 .headerorders .searchbutton:hover {
   background-color: #42b253;
@@ -2927,7 +2984,8 @@ select {
   border: 1px solid #e0e6f3;
   border-top: 0;
   padding: 10px;
-  margin-bottom: 55px;
+  margin-bottom: 80px;
+  align-items: center;
 }
 @media (max-width: 1100px) {
   .results {
@@ -2944,18 +3002,15 @@ select {
   }
 }
 .results span {
-  /* background-color: #6a6c6f; */
-  /* color: #fff; */
   border-radius: 10px;
   padding: 5px;
   text-align: center;
 }
 .actions {
   display: grid;
-  /* grid-auto-flow: column; */
   grid-template-columns: 1fr;
   column-gap: 20px;
-  
+  padding: 20px 0px;  
 }
 @media (max-width: 1100px) {
   .actions {
@@ -2990,34 +3045,6 @@ select {
     font-size: 13px;
   }
 }
-.actions .exporsel {
-  color: #fff;
-  background-color: orange;
-  border: none;
-  height: 50px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size:large;
-}
-.actions .exporsel:focus {
-  border: none;
-  outline: none;
-}
-.actions .exporsel:hover {
-  background-color: #f7a204;
-}
-@media (max-width: 1100px) {
-  .actions .exporsel {
-    width: 100%;
-  }
-}
-@media (max-width: 900px) {
-  .actions .exporsel {
-    font-size: 16px;
-  }
-}
 .actions .pendingpay {
   color: #fff;
   background-color: #f34c4c;
@@ -3048,9 +3075,7 @@ select {
   font-size: 24px;
 }
 .actions .pendingpay span.circle {
-  padding: 3px;
-  padding-top: 6px;
-  padding-bottom: 6px;
+  padding: 6px 3px;
 }
 @media (max-width: 900px) {
   .actions .pendingpay {
@@ -3065,8 +3090,8 @@ select {
 }
 .tableorders {
   width: 100%;
-  border: solid 1px #d7e0f1;
   background-color: #ffffff;
+  margin: 20px 0px;
 }
 @media (max-width: 1200px) {
   .tableorders {
@@ -3077,10 +3102,28 @@ select {
   vertical-align: middle;
   border-right: 1px solid #d7e0f1;
   white-space: unset;
+  text-align: center;
 }
 .tableorders tbody tr td {
   border-bottom: none;
-  border-right: 1px solid #d7e0f1;
+  border: 1px solid #d7e0f1;
+}
+.merchants .searchtable, .users .searchtable {
+  border: none;
+  background-color: transparent;
+}
+.merchants .searchtable thead, .users .searchtable thead {
+  border: none;
+  background-color: transparent;
+}
+.merchants .searchtable thead tr, .users .searchtable thead tr {
+  border: none;
+  background-color: transparent;
+}
+.merchants .searchtable thead tr th, .users .searchtable thead tr th {
+  font-size: 16px;
+  border: none;
+  background-color: transparent;
 }
 @media (max-width: 1200px) {
   .tableorders tbody tr td {
@@ -3088,9 +3131,26 @@ select {
     border-bottom: 1px solid #d7e0f1;
     border-left: none;
   }
-  .merchants .searchtable thead tr {
+  .merchants .searchtable tbody tr, .users .searchtable tbody tr {
     display: flex;
     flex-direction: column;
+  }
+  .merchants .searchtable thead, .users .searchtable thead {
+    display: none;
+  }
+  .merchants .searchtable tbody tr td, .users .searchtable tbody tr td {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    padding-left: 10px;
+    border: solid 1px #d7e0f1;
+    background-color: #ffffff;
+  }
+  body.bodyAdmin .searchtable tbody tr td::before {
+    content: attr(data-label);
+    float: left;
+    font-weight: bold;
+    text-transform: uppercase;
   }
 }
 .tableorders .outstanding {
@@ -3168,6 +3228,10 @@ select {
   font-size: 16px;
   padding: 5px;
   text-align: center;
+  width: 120px;
+  margin: 0px;
+  border-radius: 4px;
+  cursor: text;
 }
 @media (max-width: 900px) {
   .tableorders .buttonge {
@@ -3180,21 +3244,23 @@ select {
   color: #fff;
   font-size: 16px;
   height: 34px;
-  padding: 5px;
-  padding-left: 10px;
-  padding-right: 40px;
+  padding: 0px 40px 0px 20px;
   align-content: center;
   background-image: url(/img/view.png);
   background-repeat: no-repeat;
   background-position: right 10px center;
-  border-radius: 10px;
+  border-radius: 4px;
   text-align: center;
+  cursor: pointer;
+}
+.tableorders .view.admin-user-view {
+  width: 100%;
 }
 .tableorders .view:hover {
   background-color: #42b253;
 }
 @media (max-width: 1200px) {
-  .tableorders .view {
+  .tableorders .productdatarow .view {
     width: 100%;
   }
 }
@@ -3207,13 +3273,16 @@ select {
   color: #fff;
   background-color: #1e7138;
   border: none;
-  border-radius: 10px;
+  border-radius: 4px;
   font-size: 16px;
-  padding: 5px;
+  padding: 0px 40px 0px 20px;
   min-width: 120px;
   min-height: 34px;
   box-sizing: border-box;
   cursor: pointer;
+  background-image: url(/img/view.png);
+  background-repeat: no-repeat;
+  background-position: right 10px center;
 }
 .tableorders .vieworder:focus {
   border: none;
@@ -3267,13 +3336,13 @@ select {
 .tableorders .payorder.paid {
   background-color: #fff;
   color: #1A6E33;
-  /* border: 1px solid #1A6E33; */
   font-weight: bolder;
+  cursor: text;
 }
 .tableorders .payorder.canceled {
   background-color: #fff;
   color: #929292;
-  /* border: 1px solid #929292; */
+  cursor: text;
 }
 .ordertable {
   border: solid 1px #d7e0f1;
@@ -3302,10 +3371,12 @@ select {
   }
 }
 .ordertable .otawrap {
-  padding-left: 25px;
-  padding-right: 25px;
-  padding-top: 30px;
-  padding-bottom: 30px;
+  padding: 30px 25px;
+}
+@media (max-width: 1300px) {
+  .ordertable .otawrap {
+    padding: 10px;
+  }
 }
 .ordertable .twocols2 {
   display: grid;
@@ -3320,9 +3391,6 @@ select {
 }
 .ordertable .box {
   padding: 20px;
-  /* border: solid 1px #d7e0f1; */
-  /* margin-bottom: 23px;
-  margin-top: 20px; */
 }
 .ordertable .box h3 {
   font-size: 32px;
@@ -3330,7 +3398,6 @@ select {
   font-weight: 800;
   text-align: left;
   margin: 0;
-  /* margin-top: 15px; */
 }
 @media (max-width: 1600px) {
   .ordertable .box h3 {
@@ -3341,9 +3408,6 @@ select {
   .ordertable .box h3 {
     font-size: 19px;
   }
-}
-.ordertable .box .cwrap {
-  /* padding: 20px; */
 }
 .ordertable .box p {
   color: #6a6c6f;
@@ -3356,9 +3420,6 @@ select {
   .ordertable .box p {
     font-size: 14px;
   }
-}
-.ordertable .box p:last-child {
-  /* margin-bottom: 0; */
 }
 .ordertable .box p a {
   color: #44b955;
@@ -3409,19 +3470,18 @@ select {
   border: 1px solid #6a6c6f;
   color: #6a6c6f;
   padding-left: 10px;
+  font-size: 1rem;
+}
+.ordertable .box .formg span {
+  font-size: 1rem;
 }
 @media (max-width: 1600px) {
   .ordertable .box .formg input[type="text"],
-  .ordertable .box .formg select {
+  .ordertable .box .formg select,
+  .ordertable .box .formg span {
     font-size: 14px;
   }
 }
-/* @media (max-width: 1200px) {
-  .ordertable .box .resume tbody tr {
-    display: grid;
-    grid-auto-flow: column;
-  }
-} */
 .ordertable .box .resume .header {
   text-align: center;
   font-weight: 700;
@@ -3569,9 +3629,10 @@ select {
 }
 .ordertable .productbtn {
   display: flex;
-  /* grid-template-columns: 200px 200px; */
   justify-content: flex-end;
   column-gap: 20px;
+  align-items: center;
+  padding: 20px;
 }
 @media (max-width: 600px) {
   .ordertable .productbtn {
@@ -3587,37 +3648,41 @@ select {
   color: #fff;
   padding: 5px;
 }
-@media (max-width: 1600px) {
-  .ordertable .productbtn a {
-    font-size: 15px;
-  }
-}
 .ordertable .productbtn .payments {
   background-color: #44b955;
   color: #fff;
   border: #44b955;
-  padding: 10px;
-  border-radius: 5px;
-  /* font-weight: bold; */
+  border-radius: 4px;
   font-size: 21px;
   min-width: 200px;
+  padding: 10px;
+}
+@media (max-width: 1600px) {
+  .ordertable .productbtn a {
+    font-size: 15px;
   }
-  .ordertable .productbtn .payments:hover {
-    background-color: #41a14f;
-    border: #41a14f;
+  .ordertable .productbtn .payments {
+    padding: 0px;
+    min-width: 150px;
+    height: 43px;
   }
-  .ordertable .productbtn .payments:focus {
-    border: none;
-    outline: none;
-  }
-  .ordertable .productbtn .cancel {
+}
+.ordertable .productbtn .payments:hover {
+  background-color: #41a14f;
+  border: #41a14f;
+}
+.ordertable .productbtn .payments:focus {
+  border: none;
+  outline: none;
+}
+.ordertable .productbtn .cancel {
   background-color: transparent;
   border: none;
-  padding: 10px;
+  padding: 0px;
   border-radius: 15px;
-  /* font-weight: bold; */
   font-size: 21px;
   text-decoration: underline;
+  cursor: pointer;
 }
 .ordertable .productbtn .cancel:focus {
   border: none;

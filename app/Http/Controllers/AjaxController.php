@@ -560,7 +560,9 @@ class AjaxController extends Controller
 
             $total_period_orders = Order::where('id_customer', Auth::user()->id);
 
+            $is_notification = false;
             if ($parameters['notifications'] != '' && $parameters['notifications']) {
+                $is_notification = true;
                 $order_list = $order_list->where('financial_status', OrderStatus::Outstanding)
                     ->where('fulfillment_status', OrderStatus::NewOrder);
                 $total_period_orders = $total_period_orders->where('financial_status', OrderStatus::Outstanding)
@@ -573,10 +575,12 @@ class AjaxController extends Controller
 
             if ($parameters['from'] != '' && $parameters['to'] != '') {
                 $total_period_orders = $total_period_orders->whereDate('created_at', '>=', $parameters['from'])
-                    ->whereDate('created_at', '<=', $parameters['to']);
+                ->whereDate('created_at', '<=', $parameters['to']);
             } else {
-                $total_period_orders = $total_period_orders->whereDate('created_at', '>=', $current_period->start_date)
-                    ->whereDate('created_at', '<=', $current_period->end_date);
+                if ($current_period != null) {
+                    $total_period_orders = $total_period_orders->whereDate('created_at', '>=', $current_period->start_date)
+                        ->whereDate('created_at', '<=', $current_period->end_date);
+                }
             }
 
             if ($parameters['order_number'] != '' && $parameters['order_number'] > 0) {
@@ -585,6 +589,8 @@ class AjaxController extends Controller
             } else {
                 if ($parameters['from'] != '' && $parameters['to'] != '') {
                     $order_list = $order_list->whereDate('created_at', '>=', $parameters['from'])
+                        ->whereDate('created_at', '<=', $parameters['to']);
+                    $total_period_orders = $total_period_orders->whereDate('created_at', '>=', $parameters['from'])
                         ->whereDate('created_at', '<=', $parameters['to']);
                 }
             }
@@ -604,7 +610,10 @@ class AjaxController extends Controller
                 $total_period_orders = $total_period_orders->where('orders.fulfillment_status', $parameters['order_state']);
             }
 
-            $notifications = Order::where('financial_status', OrderStatus::Outstanding)
+            $notifications = Order::join('order_shipping_address as osa', 'orders.id', 'osa.id_order')
+                ->join('status as st1', 'st1.id', 'orders.financial_status')
+                ->join('status as st2', 'st2.id', 'orders.fulfillment_status')
+                ->where('financial_status', OrderStatus::Outstanding)
                 ->where('fulfillment_status', OrderStatus::NewOrder)
                 ->where('orders.id_customer', Auth::user()->id)
                 ->count();
@@ -620,7 +629,9 @@ class AjaxController extends Controller
                     'to' => $parameters['to'],
                     'basic_period' => $basic_period,
                     'total_period_orders' => $total_period_orders,
-                    'total_count' => $order_count
+                    'limit_orders' => env('LIMIT_ORDERS'),
+                    'total_count' => $order_count,
+                    'is_notification' => $is_notification
                 ],
                 'total_count' => $total_count,
                 'page_size' => $page_size,
