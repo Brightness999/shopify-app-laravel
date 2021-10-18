@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('content')
 
-<div class="indexContent" data-page_name="ADMIN ORDERS">
+<div class="indexContent" @if($merchant_name != '') data-page_name="ADMIN ORDERS ({{$merchant_name}})" @else data-page_name="ADMIN ORDERS" @endif>
     <div class="maincontent">
         <div class="wrapinsidecontent">
 
@@ -19,14 +19,14 @@
                 </div>
                 <div class="ordernumber">
                     <span class="ordernumberlabel">Order Number</span>
-                    <input type="text" id="idOrder" list="numbers" placeholder="GDS ORDER #">
+                    <input type="text" id="idOrder" list="numbers">
                     <datalist id="numbers">
                         <div id="number_data"></div>
                     </datalist>
                 </div>
                 <div class="merchantname">
                     <span class="merchantlabel">Name</span>
-                    <input type="text" id="merchant" list="names" placeholder="Merchant">
+                    <input type="text" id="merchant" list="names">
                     <datalist id="names">
                         <div id="merchant_data"></div>
                     </datalist>
@@ -36,7 +36,7 @@
                         Payment Status
                     </span>
                     <select id="paymentstatus">
-                        <option value="0">Payment Status</option>
+                        <option value="0"></option>
                         @foreach($status as $st)
                         @if($st->type == 1)
                         <option value="{{$st->id}}" {{(Request()->selectFS==$st->id?'selected':'')}}>{{$st->name}}</option>
@@ -49,7 +49,7 @@
                         Order State
                     </span>
                     <select id="orderstate">
-                        <option value="0">Order State</option>
+                        <option value="0"></option>
                         @foreach($status as $st)
                         @if($st->type == 2)
                         <option value="{{$st->id}}" {{(Request()->selectOS==$st->id?'selected':'')}}>{{$st->name}}</option>
@@ -58,15 +58,14 @@
                     </select>
                 </div>
                 <div class="searchbtn">
-                    <button id="search" class="searchbutton greenbutton"><i class="fa fa-search" aria-hidden="true"></i> Search</button>
+                    <button id="search" class="searchbutton greenbutton cel-icon-search">Search</button>
+                    <span class="mx-3 my-3 btn-link h5 admin-order-reset" style="text-decoration: underline; cursor: pointer;">Reset</span>
                 </div>
             </div>
 
-            <div class="actions my-5">
-                <button class="exporsel">Export Selected Orders</button>
-                <div></div>
+            <div class="actions my-4">
                 <div class="pagesize">
-                    <span>Show</span>
+                    <span class="h5 my-0">Show</span>
                     <select name="PageSize" id="page_size">
                         <option value="10">10</option>
                         <option value="20">20</option>
@@ -77,109 +76,56 @@
             </div>
 
             <div class="orders">
-                <table class="greentable tableorders" cellspacing="0">
+                <table class="greentable tableorders orders" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>
-                                <input type="checkbox" id="check-orders">
-                            </th>
-                            <th>
-                                GDS ORDER #
-                            </th>
-                            <th>
-                                DATE
-                            </th>
-                            <th>
-                                TOTAL TO PAY
-                            </th>
-                            <th>
-                                MERCHANT
-                            </th>
-                            <th>
-                                PAYMENT STATUS <span class="simple-tooltip" title="This indicates whether or not your payment has been processed.">?</span>
-                            </th>
-                            <th>
-                                ORDER STATE <span class="simple-tooltip" title="This is the status of your customer's order.">?</span>
-                            </th>
-                            <th>
-                                VIEW
-                            </th>
+                            <th>SHOPIFY ORDER ID</th>
+                            <th>CUSTOMER ORDER NUMBER</th>
+                            <th>GDS ORDER NUMBER</th>
+                            <th>DATE</th>
+                            <th>TOTAL TO PAY</th>
+                            <th>MERCHANT</th>
+                            <th>PAYMENT STATUS <span class="simple-tooltip" title="This indicates whether or not your payment has been processed.">?</span></th>
+                            <th>ORDER STATE <span class="simple-tooltip" title="This is the status of your customer's order.">?</span></th>
+                            <th>ACTION</th>
                         </tr>
                     </thead>
-                    <tbody id="order_data">
-
-                        @php $k = 0 @endphp
-                        @foreach($order_list as $ol)
-                        @if($k == 0)
-                        @php
-                        $back = 'transparent';
-                        $k = 1;
-                        @endphp
-                        @else
-                        @php
-                        $back = '';
-                        $k = 0;
-                        @endphp
-
-                        @endif
-                        <tr class="orderrow">
-                            <td class="check">
-                                <input type="checkbox" class="checkbox" data-id="{{$ol->id}}">
-                            </td>
-                            <td data-label="ORDER #">
-                                {{$ol->magento_order_id}}
-                            </td>
-                            <td data-label="DATE">
-                                {{$ol->created_at}}
-                            </td>
-                            <td data-label="TOTAL TO PAY">
-                                ${{number_format($ol->total, 2, '.', '')}}
-                            </td>
-                            <td data-label="MERCHANT">
-                                {{$ol->merchant_name}}
-                            </td>
-                            <td>
-                                <div class="buttonge" style="background-color: {{$ol->color1}}">{{$ol->status1}}</div>
-                            </td>
-                            <td>
-                                <div class="buttonge" style="background-color: {{$ol->color2}}">{{$ol->status2}}</div>
-                            </td>
-                            <td>
-                                <a href="/admin/orders/{{$ol->id}}">
-                                    <button class="view greenbutton">View</button>
-                                </a>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
+                    <tbody id="order_data"></tbody>
                 </table>
             </div>
+            <div id="pagination"></div>
         </div>
     </div>
 </div>
+<div class="back-to-top" style="display:none">
+    <img src=" {{ asset('/img/back_to_top.png') }}" alt="Back to Top">
+    <span style="text-align: center;" class="h5">Back<br>to Top</span>
+</div>
 
-<div id="pagination"></div>
-<input type="text" id="total_count" value="{{$total_count}}" hidden>
+<input type="text" id="total_count" value="{{$total_count ? $total_count : 0}}" hidden>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js"></script>
 
 <script type="text/javascript">
     $(document).ready(function() {
-        $('#total_count').text("{{$total_count}}");
+        $('#total_count').text("{{$total_count ? $total_count : 0}}");
 
         $('#idOrder').keydown(function(e) {
-            let length = $('#idOrder').val().length;
+            let length = e.target.value.length;
+            let number = e.target.value;
             if (e.key) {
                 if (e.key.length == 1) {
                     length += 1;
+                    number += e.key;
                 } else {
                     if (e.code == 'Backspace') {
                         length -= 1;
+                        number = number.slice(0, -1);
                     }
                 }
-                if (length > 2) {
+                if (length > 2 && (e.key.length == 1 || e.key == 'Backspace')) {
                     $.getJSON(ajax_link, {
                         action: 'admin-order-number',
-                        number: $('#idOrder').val().trim()
+                        number: number
                     }, function(data) {
                         var str = '<div id="number_data">';
                         data.numbers.forEach(number => {
@@ -196,20 +142,22 @@
         })
 
         $('#merchant').keydown(function(e) {
-            let length = $('#merchant').val().length;
+            let length = e.target.value.length;
+            let merchant = e.target.value;
             if (e.key) {
                 if (e.key.length == 1) {
                     length += 1;
+                    merchant += e.key;
                 } else {
                     if (e.code == 'Backspace') {
                         length -= 1;
+                        merchant = merchant.slice(0, -1);
                     }
                 }
-                if (length > 2) {
-                    console.log(length)
+                if (length > 2 && (e.key.length == 1 || e.key == 'Backspace')) {
                     $.getJSON(ajax_link, {
                         action: 'admin-order-merchant',
-                        name: $('#merchant').val().trim()
+                        name: merchant
                     }, function(data) {
                         var str = '<div id="merchant_data">';
                         data.names.forEach(name => {
@@ -232,17 +180,6 @@
                 $('.checkbox').prop('checked', false);
             }
         })
-
-        $('.exporsel').click(function() {
-            var ids = [];
-            $("input.checkbox:checked").each(function (index, ele) {
-                ids.push($(ele).data('id'));
-            });
-            if (ids.length) {
-                window.location.href = `/admin/orders/exports?ids=${JSON.stringify(ids)}`;
-            }
-
-        });
     });
 </script>
 @endsection

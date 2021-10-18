@@ -1,142 +1,108 @@
 @extends('layouts.app')
 @section('content')
-<div class="orderDetailContent" data-page_name="ADMIN ORDER DETAIL">
+<div class="indexContent" data-page_name="ADMIN ORDER DETAILS">
     <div class="maincontent">
-        <a href="{{ url()->previous() }}"><button class="btn btn-lg mx-3 my-2 back">< BACK</button></a>
         <div class="wrapinsidecontent">
             <div class="ordertable">
                 <div class="otawrap">
                     <div class="twocols2">
                         <div>
-                            <div class="headerorder">
-                                <div class="date">
-                                    <p>Order</p>
-                                    <div>
-                                        {{$order->order_number_shopify}}
-                                    </div>
-                                </div>
-            
-                                @if($order->magento_order_id)
-                                <div class="date">
-                                    <p>GDS Order</p>
-                                    <div>
-                                        #{{$order->magento_order_id}}
-                                    </div>
-                                </div>
-                                @endif
-            
-                                <div class="date">
-                                    <p>Date</p>
-                                    <div>
-                                        {{$order->created_at}}
-                                    </div>
-                                </div>
-                            </div>
                             <div class="box">
-                                <h3>Merchant Information</h3>
                                 <div class="cwrap">
-                                    <p><strong>Name</strong> <br>{{$merchant->name}}</p>
-                                    <p><strong>Email</strong> <br>{{$merchant->email}}</p>
-                                    <p><strong>Plan</strong> <br>{{$merchant->plan}}</p>
+                                    <h3>Order Information</h3>
+                                    <div class="formg">
+                                        <p class="font-weight-bold">Shopify Order ID</p>
+                                        <p><a href="https://{{$merchant->shopify_url}}/admin/orders/{{$order->id_shopify}}" target="_blank">{{$order->id_shopify}}</a></p>
+                                        <p class="font-weight-bold">Customer Order Number</p>
+                                        <p>{{substr($order->order_number_shopify, 1)}}</p>
+                                        @if($order->magento_order_id)
+                                        <p class="font-weight-bold">GDS Order Number</p>
+                                        <p>{{$order->magento_order_id}}</p>
+                                        @endif
+                                        <p class="font-weight-bold">Date</p>
+                                        <p>{{$order->created_at}} {{$order->created_at->tz()}}</p>
+                                        <p class="font-weight-bold">Payment Status</p>
+                                        <p class="paid text-center" style="background:{{$fs->color}};"><span>{{$fs->name}}</span></p>
+                                        <p class="font-weight-bold">Order State</p>
+                                        <p class="inprocess text-center" style="background:{{$os->color}};"><span>{{$os->name}}</span></p>
 
-                                    @if($order->shipping_title)
-                                    <p><strong>Shipping Information</strong> <br>
+                                        @if($order->fulfillment_status == 9)
+                                        <p class="font-weight-bold">Canceld By</p>
+                                        <p class="inprocess" style="background-color: transparent;">{{$user_canceled}}</p>
+                                        <p class="font-weight-bold">Canceled At</p>
+                                        <p class="inprocess" style="background-color: transparent;">{{$order->canceled_at}}</p>
+                                        @endif
                                         @if($order->shipping_title)
-                                    <p><strong>Shipping</strong> <br>{{$order->shipping_title}}</p>
-                                    @if($order->tracking_code)
-                                    <p><strong>Tracking Number</strong> <br>{{$order->tracking_code}}</p>
-                                    @endif
-                                    @endif
-                                    </p>
-                                    @endif
+                                        @if($order->shipping_title)
+                                        <p class="font-weight-bold">Shipping</p>
+                                        <p>{{$order->shipping_title}}</p>
+                                        @if($order->tracking_code)
+                                        <p class="font-weight-bold">Tracking Number</p>
+                                        <p>{{$order->tracking_code}}</p>
+                                        @endif
+                                        @endif
+                                        @endif
 
-                                    <div class="box addres">
-                                        <h3>Customer Address</h3>
-                                        <div class="formg">
-                                            <label>Name</label><span>{{$osa->first_name}} {{$osa->last_name}}</span>
-                                            <label>Address</label><span>{{$osa->address1}} {{$osa->address2}}</span>
-                                            <label>Zip Code</label><span>{{$osa->zip}}</span>
-                                            <label>City</label><span>{{$osa->city}}</span>
-                                            <label>State</label><span>{{$osa->province}}</span>
-                                            <label>Country</label><span>{{$osa->country}}</span>
-                                        </div>
                                     </div>
-
+                                    <h3>Merchant Information</h3>
+                                    <div class="formg">
+                                        <p class="font-weight-bold">Name</p>
+                                        <p>{{$merchant->name}}</p>
+                                        <p class="font-weight-bold">Email</p>
+                                        <p>{{$merchant->email}}</p>
+                                        <p class="font-weight-bold">Plan</p>
+                                        <p>{{$merchant->plan}}</p>
+                                        
+                                    </div>
                                     @if($order->financial_status == 2)
-                                    <div class="sod-body-side-content">
-                                        <p class="sod-title"><strong>Stripe Payment Detail</strong></p>
-                                        <p class="sod-row"><strong>Date</strong> <br>
-                                            {{$order->created_at}}
-                                        </p>
-                                        <p class="sod-row"><strong>Id Transaction</strong><br>
-                                            {{$payment_intent}}
-                                        </p>
-                                        <p class="sod-row"><strong>Card Number</strong><br>
-                                            xxxx xxxx xxxx {{$payment_card_number}}
-                                        </p>
+                                    <h3 class="sod-title">Stripe Payment Detail</h3>
+                                    <div class="formg">
+                                        <p class="font-weight-bold">Date</p><p>{{$order->created_at}} {{$order->created_at->tz()}}</p>
+                                        <p class="font-weight-bold">Id Transaction</p><p><a href="https://dashboard.stripe.com/payments/{{$payment_intent}}" target="_blank">{{$payment_intent}}</a></p>
                                     </div>
                                     @endif
+                                    <h3>Customer Address</h3>
+                                    <div class="formg">
+                                        <p class="font-weight-bold">Name</p><p>{{$osa->first_name}} {{$osa->last_name}}</p>
+                                        <p class="font-weight-bold">Address</p><p>{{$osa->address1}} {{$osa->address2}}</p>
+                                        <p class="font-weight-bold">Zip Code</p><p>{{$osa->zip}}</p>
+                                        <p class="font-weight-bold">City</p><p>{{$osa->city}}</p>
+                                        <p class="font-weight-bold">State</p><p>{{$osa->province}}</p>
+                                        <p class="font-weight-bold">Country</p><p>{{$osa->country}}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="rightSide">
-                            <div class="states">
-                                <div>
-                                    <p>Payment Status</p>
-                                    <div class="paid" style="background:{{$fs->color}};">
-                                        <span>{{$fs->name}}</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p>Order State</p>
-                                    <div class="inprocess" style="background:{{$os->color}};">
-                                        <span>{{$os->name}}</span>
-                                    </div>
-                                </div>
-
-                                @if($order->fulfillment_status == 9)
-                                <div class="sod-row colorRED" style="text-align: center;">
-                                    <span>Cancelled by {{$user_canceled}} at {{$order->canceled_at}}</span>
-                                </div>
-                                @endif
-                            </div>
                             <div class="box product">
                                 <h3>Product Detail</h3>
-                                <table class="greentable" cellspacing="0">
+                                <table class="greentable order-detail" cellspacing="0">
                                     <thead>
                                         <tr>
-                                            <th>
-                                                IMAGE
-                                            </th>
-                                            <th>
-                                                PRODUCT NAME
-                                            </th>
-                                            <th>
-                                                PRICE / PROFIT
-                                            </th>
-                                            <th>
-                                                QUANTITY
-                                            </th>
-                                            <th>
-                                                SKU
-                                            </th>
+                                            <th>IMAGE</th>
+                                            <th>PRODUCT NAME</th>
+                                            <th>PRICE</th>
+                                            <th>QUANTITY</th>
+                                            <th>SKU</th>
                                         </tr>
                                     </thead>
                                     <tbody>
 
                                         @foreach($order_products as $op)
-                                        <tr>
+                                        <tr class="order-detail">
                                             <td>
                                                 <div class="productphoto">
                                                     <img src="{{$op->image_url}}">
                                                 </div>
                                             </td>
-                                            <td data-label="PRODUCT NAME">
-                                                {{$op->name}}
+                                            <td data-label="PRODUCT NAME" class="product-name">
+                                                <span>
+                                                    {{$op->name}}
+                                                </span>
                                             </td>
-                                            <td data-label="PRICE">
+                                            <td data-label="PRICE" class="nowrap">
                                                 <strong>
-                                                    ${{$op->price . ' / ' . $op->profit}}%
+                                                    US ${{$op->price}}
                                                 </strong>
                                             </td>
                                             <td data-label="QUANTITY">
@@ -147,41 +113,37 @@
                                         @endforeach
                                     </tbody>
                                 </table>
-                                    <table class="resumetable resume my-5" cellspacing="0">
-                                        <tbody>
-                                            <tr>
-                                                <td colspan="2" class="header">
-                                                    ORDER RESUME
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>SUB TOTAL</strong></td>
-                                                <td>${{$order->total}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>SHIPPING & HANDLING</strong></td>
-                                                <td>${{$order->shipping_price}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>STORE CREDIT</strong></td>
-                                                <td>${{$mg_order ? number_format($mg_order->grand_total - $mg_order->subtotal - $mg_order->shipping_amount, 2, '.', '') : 0}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>GRAND TOTAL</strong></td>
-                                                <td>${{$mg_order ? $mg_order->grand_total : $order->total + $order->shipping_price}}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                <table class="resumetable resume my-5" cellspacing="0">
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>SUB TOTAL</strong></td>
+                                            <td>US ${{$order->total}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>SHIPPING & HANDLING</strong></td>
+                                            <td>US ${{$order->shipping_price}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>STORE CREDIT</strong></td>
+                                            <td>US ${{$mg_order ? number_format($mg_order->grand_total - $mg_order->subtotal - $mg_order->shipping_amount, 2, '.', '') : 0}}</td>
+                                        </tr>
+                                        <tr class="border-top">
+                                            <td><strong>GRAND TOTAL</strong></td>
+                                            <td>US ${{$mg_order ? $mg_order->grand_total : $order->total + $order->shipping_price}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
 
-                                    <div class="notes">
-                                        <textarea class="ta{{$order->id}}">{{$order->notes}}</textarea>
-                                        <div class="btns">
-                                            <button id='btnNotes' data-id="{{$order->id}}" class="btn bgVO colorBL my-1">Update Notes</button>
-                                            @if($order->fulfillment_status== 4)
-                                            <button class="btn bgVC bgRED colorBL my-1" id="cancel-button" data-toggle="modal" data-target="#confirm-modal" data-id="{{$order->id}}">Cancel Order</button>
-                                            @endif
-                                        </div>
+                                <div class="notes">
+                                    <textarea class="ta{{$order->id}}">{{$order->notes}}</textarea>
+                                    <div class="btns">
+                                        @if($order->fulfillment_status== 4)
+                                        <button class="cancel my-1" id="cancel-button" data-toggle="modal" data-target="#confirm-modal" data-id="{{$order->id}}">Cancel Order</button>
+                                        @endif
+                                        <button id='btnNotes' data-id="{{$order->id}}" class="btn my-1">Update Notes</button>
                                     </div>
+                                    <span class="text-right text-green d-none" id="success-note">The notes have updated successfully.</span>
+                                </div>
                             </div>
                         </div>
                     </div>

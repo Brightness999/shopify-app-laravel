@@ -88,23 +88,18 @@ $(document).ready(function () {
     })
 
     /* ADMIN ORDER DETAIL */
-    $('#btnNotes').click(function () {
-        var texto = $('textarea.ta' + $(this).data('id')).val()
+    $('#btnNotes').click(function (e) {
+        var texto = $(`textarea.ta${e.target.dataset.id}`).val()
         var parameters = {
             action: 'update_notes',
-            id_order: $(this).data('id'),
-            notes: ' ' + texto
+            id_order: e.target.dataset.id,
+            notes: texto
         }
-
         $.getJSON(ajax_link, parameters, function (data) {
-            $('textarea.ta' + $(this).data('id')).val(' ' + texto);
-            $('#confirm-modal-body').html(`<h5>The notes have been updated successfully</h5>`);
-            $('#confirm-modal-footer').hide();
-            $('#confirm-modal').css('display', 'block');
-            $('#confirm-modal').addClass('show');
+            $(`textarea.ta${e.target.dataset.id}`).val(data.notes);
+            $('#success-note').removeClass('d-none');
             setTimeout(() => {
-                $('#confirm-modal').css('display', 'none');
-                $('#confirm-modal').removeClass('show');
+                $('#success-note').addClass('d-none');
             }, 2000);
         })
     })
@@ -432,26 +427,21 @@ $(document).ready(function () {
         })
     })
 
+    $('.admin-order-reset').click(function() {
+        $('#dateFrom').val('');
+        $('#dateTo').val('');
+        $('#idOrder').val('');
+        $('#merchant').val('');
+        $('#paymentstatus').val('');
+        $('#orderstate').val('');
+        getOrderData();
+    });
+
     $("#search").click(function(e) {
         var flag = adminOrderSearchPermission();
         if (flag) {
-            var parameters = {
-                action: getAction(),
-                page_size: $('#page_size').val(),
-                page_number: 1,
-                from: $('#dateFrom').val(),
-                to: $('#dateTo').val(),
-                order_number: $('#idOrder').val().trim(),
-                merchant_name: $('#merchant').val().trim(),
-                payment_status: $('#paymentstatus').val(),
-                order_state: $('#orderstate').val()
-            }
-            $.getJSON(ajax_link, parameters, function(res) {
-                pagination(res);
-                showAdminOrders(res.order_list);
-            });
+            getOrderData();
         }
-
     });
 
     $('#merchant_name').keydown(function(e) {
@@ -807,6 +797,25 @@ function showUsers(users) {
     $('#user_data').html(str);
 }
 
+function getOrderData() {
+    var parameters = {
+        action: getAction(),
+        page_size: $('#page_size').val(),
+        page_number: 1,
+        from: $('#dateFrom').val(),
+        to: $('#dateTo').val(),
+        order_number: $('#idOrder').val().trim(),
+        merchant_name: $('#merchant').val().trim(),
+        payment_status: $('#paymentstatus').val(),
+        order_state: $('#orderstate').val()
+    }
+    $.getJSON(ajax_link, parameters, function(res) {
+        pagination(res);
+        showAdminOrders(res.order_list);
+        $('#loading').hide();
+    });
+}
+
 function adminOrderSearchPermission() {
     var from = $('#dateFrom').val();
     var to = $('#dateTo').val();
@@ -814,51 +823,40 @@ function adminOrderSearchPermission() {
     if (from != '' && to != '') {
         if (moment(from).isAfter(moment(to).format('YYYY-MM-DD'))) {
             flag = false;
-            $('#confirm-modal-body').html(`<h5>Invalid date range</h5>`);
-            $('#confirm-modal-footer').hide();
+            $('#confirm-modal-body').html(`<h5 class="my-0">Invalid date range</h5>`);
+            $('#cancel').hide();
+            $('#confirm').text('Confirm');
             $('#search').attr('data-toggle', 'modal');
             $('#search').attr('data-target', '#confirm-modal');
         } else {
             $('#search').attr('data-toggle', '');
         }
+    } else {
+        $('#search').attr('data-toggle', '');
     }
     return flag;
 }
 
 function showAdminOrders (orders) {
     var str = '';
-    orders.forEach(order => {
+    orders.order_list.forEach(order => {
         str += `<tr class="orderrow">
-            <td class="check">
-                <input type="checkbox" class="checkbox" data-id="${order.id}}">
-            </td>
-            <td data-label="ORDER #">
-                ${order.magento_order_id ? order.magento_order_id : ''}
-            </td>
-            <td data-label="DATE">
-                ${order.created_at}
-            </td>
-            <td data-label="TOTAL TO PAY">
-                $${parseFloat(order.total).toFixed(2)}
-            </td>
-            <td data-label="MERCHANT">
-                ${order.merchant_name}
-            </td>
-            <td>
-                <div class="buttonge" style="background-color: ${order.color1}">${order.status1}</div>
-            </td>
-            <td>
-                <div class="buttonge" style="background-color: ${order.color2}">${order.status2}</div>
-            </td>
-            <td>
-                <a href="/admin/orders/${order.id}">
-                    <button class="view greenbutton">View</button>
-                </a>
-            </td>
+            <td data-label="SHOPIFY ORDER ID">${order.id_shopify ? order.id_shopify : ''}</td>
+            <td data-label="CUSTOMER ORDER NUMBER">${order.order_number_shopify ? order.order_number_shopify.substr(1) : ''}</td>
+            <td data-label="GDS ORDER NUMBER">${order.magento_order_id ? order.magento_order_id : ''}</td>
+            <td data-label="DATE">${order.created_at} ${orders.timezone}</td>
+            <td data-label="TOTAL TO PAY" class="nowrap">US $${parseFloat(order.total).toFixed(2)}</td>
+            <td data-label="MERCHANT">${order.merchant_name}</td>
+            <td data-label="PAYMENT STATUS"><label class="buttonge" style="background-color: ${order.color1}">${order.status1}</label></td>
+            <td data-label="ORDER STATE"><label class="buttonge nowrap" style="background-color: ${order.color2}">${order.status2}</label></td>
+            <td><a href="/admin/orders/${order.id_shopify}" target="_blank"><button class="view greenbutton">View</button></a></td>
         </tr>`;
     });
     $('.orderrow').remove();
     $('#order_data').html(str);
+    setTimeout(() => {
+        window.scrollTo(0,0);
+    }, 500);
 }
 
 function showMerchants (merchants) {

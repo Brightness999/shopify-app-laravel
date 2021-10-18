@@ -623,3 +623,41 @@ body.bodyAdmin .orderDetailContent {
   margin-bottom: 11px;
   color: #1a6e34;
 }
+@media (max-width: 1680px) {
+  body.bodyAdmin .greentable.orders {
+    background-color: transparent;
+    border: none;
+  }
+  body.bodyAdmin .greentable.orders thead {
+    display: none;
+  }
+  body.bodyAdmin .greentable.orders tbody tr {
+    display: block;
+  }
+  body.bodyAdmin .greentable.orders tbody tr.orderrow {
+    margin-top: 40px;
+  }
+  body.bodyAdmin .greentable.orders tbody tr.orderrow:first-child {
+    margin-top: 0;
+  }
+  body.bodyAdmin .greentable.orders tbody tr td {
+    display: block;
+    text-align: right;
+    border: solid 1px #d7e0f1;
+    background-color: #ffffff;
+  }
+  body.bodyAdmin .greentable.orders tbody tr td::before {
+    content: attr(data-label);
+    float: left;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  body.bodyAdmin .tableorders.orders tbody tr td {
+    border-right: none;
+    border-bottom: 1px solid #d7e0f1;
+    border-left: none;
+  }
+  body.bodyAdmin .tableorders.orders .view {
+    width: 100%;
+  }
+}

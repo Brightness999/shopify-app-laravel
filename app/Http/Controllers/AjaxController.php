@@ -116,10 +116,9 @@ class AjaxController extends Controller
 
         if ($parameters['action'] == 'update_notes') {
             $row = Order::find($parameters['id_order']);
-            $row->notes = $row->notes . $parameters['notes'];
+            $row->notes = $parameters['notes'];
             $row->save();
-
-            return json_encode(1);
+            return json_encode(['notes' => $row->notes]);
         }
 
         if ($parameters['action'] == 'update-user') {
@@ -414,10 +413,19 @@ class AjaxController extends Controller
         }
 
         if ($parameters['action'] == 'admin-order-number') {
-            $numbers = DB::table('orders')->distinct()
+            $magento_numbers = DB::table('orders')->distinct()
                 ->where('magento_order_id', 'like', '%' . $parameters['number'] . '%')
                 ->orderBy('magento_order_id')
-                ->pluck('magento_order_id');
+                ->pluck('magento_order_id')->toArray();
+            $shopify_numbers = DB::table('orders')->distinct()
+                ->where('id_shopify', 'like', '%' . $parameters['number'] . '%')
+                ->orderBy('id_shopify')
+                ->pluck('id_shopify')->toArray();
+            $customer_numbers = DB::table('orders')->distinct()
+                ->where('order_number_shopify', 'like', '%' . $parameters['number'] . '%')
+                ->orderBy('order_number_shopify')
+                ->pluck('order_number_shopify')->toArray();
+            $numbers = array_merge_recursive($magento_numbers, $shopify_numbers, $customer_numbers);
             return json_encode(['numbers' => $numbers]);
         }
 
@@ -438,7 +446,9 @@ class AjaxController extends Controller
                 ->join('status as st2', 'st2.id', 'orders.fulfillment_status')
                 ->join('users as us', 'us.id', 'orders.id_customer');
             if ($parameters['order_number'] != '') {
-                $order_list = $order_list->where('magento_order_id', 'like', '%' . $parameters['order_number'] . '%');
+                $order_list = $order_list->where('magento_order_id', 'like', '%' . $parameters['order_number'] . '%')
+                    ->orWhere('id_shopify', 'like', '%' . $parameters['order_number'] . '%')
+                    ->orWhere('order_number_shopify', 'like', '%' . $parameters['order_number'] . '%');
             }
 
             if ($parameters['from'] != '') {
@@ -461,13 +471,20 @@ class AjaxController extends Controller
                 $order_list = $order_list->where('us.name', 'like', '%' . $parameters['merchant_name'] . '%');
             }
 
+            if ($parameters['id_customer'] != '') {
+                $order_list = $order_list->where('orders.id_customer', $parameters['id_customer']);
+            }
             $total_count = $order_list->count();
             $order_list = $order_list->orderBy('orders.updated_at', 'desc')->skip(($page_number - 1) * $page_size)->take($page_size)->get();
+            $timezone = count($order_list) ? $order_list[0]->created_at->tz() : '';
             return json_encode([
-                'order_list' => $order_list,
+                'order_list' => [
+                    'order_list' => $order_list,
+                    'timezone' => $timezone
+                ],
                 'page_number' => $page_number,
                 'page_size' => $page_size,
-                'total_count' => $total_count
+                'total_count' => $total_count,
             ]);
         }
 
