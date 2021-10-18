@@ -4254,3 +4254,278 @@ button.back {
   justify-items: center;
   cursor: pointer;
 }
+
+.modal-header .close:focus {
+  border: none;
+  outline: none;
+}
+
+#fade-background {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1040;
+  background-color: #000;
+  opacity: .5;
+}
+
+.check-all-new-products, .check-all-discount-products {
+  width: 20px;
+  height: 20px;
+}
+
+.introduction-content .toolbar {
+  display: grid;
+  grid-template-columns: auto 250px;
+  padding-bottom: 20px;
+  gap: 20px;
+}
+
+@media (max-width: 800px) {
+  .introduction-content .toolbar {
+    grid-template-columns: 1fr;
+  }
+}
+
+.introduction-content .toolbar #search-products {
+  display: flex;
+}
+
+.introduction-content .toolbar #search-products input {
+  font-size: 21px;
+  padding-left: 20px;
+  border: solid 1px #929292;
+  width: 100%;
+  border-radius: 4px 0px 0px 4px;
+  border-right: none;
+}
+
+.introduction-content .toolbar #search-products input:focus {
+  outline: none;
+}
+
+.introduction-content .toolbar #search-products span {
+  background: #44b955;
+  border: solid 12px #44b955;
+  border-radius: 0px 4px 4px 0px;
+  height: 40px;
+  display: flex;
+  font-size: 25px;
+  color: #fff;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 3px;
+  cursor: pointer;
+}
+
+.introduction-content .toolbar #sorting {
+  margin: auto 0;
+}
+
+.introduction-content .toolbar #sorting .select-wrapper {
+  margin: auto 0;
+}
+
+.introduction-content .toolbar #sorting .select-wrapper select {
+  padding: 0px 5px;
+  font-size: 1rem;
+  text-align: left;
+  border: 1px solid #929292;
+  -webkit-appearance: window;
+  -moz-appearance: window;
+  appearance: window;
+  -webkit-user-select: none;
+  background: #fff;
+  height: 40px;
+  border-radius: 4px;
+}
+
+.introduction-content .toolbar #sorting .select-wrapper select:focus {
+  outline: none;
+}
+
+.introduction-products {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) minmax(200px, 1fr) minmax(200px, 1fr) minmax(200px, 1fr) minmax(200px, 1fr);
+  gap: 30px;
+  margin-bottom: 30px;
+  background-color: #fff;
+  padding: 0px 10px;
+}
+
+.introduction-products .product-item {
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  position: relative;
+  padding-top: 50px;
+  padding-bottom: 20px;
+}
+
+.introduction-products .product-item:hover {
+  box-shadow: 0px 0px 6px -2px rgba(0, 0, 0, 0.45);
+}
+
+.introduction-products .product-item input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin: 21px 0px 0px 10px;
+}
+
+.introduction-products .product-item .product-container {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  height: 100%;
+}
+
+.introduction-products.new-products .product-item .product-container {
+  padding: 0px;
+}
+
+.introduction-products.discount-products .product-item .product-container {
+  padding: 0px;
+}
+
+.introduction-products .product-item .product-container a {
+  text-align: center;
+  font-size: 1rem;
+  height: 100%;
+}
+
+.introduction-products .product-item .product-container a .product-image  {
+  height: 200px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  /* border: solid 1px #efefef; */
+  flex: 1;
+  align-items: center;
+}
+
+.introduction-products .product-item .product-container a .product-image img.main-image {
+  width: 160px;
+}
+
+.introduction-products .product-item .product-container a .product-image .new-sticker {
+  position: absolute;
+  top: -40px;
+  right: 0px;
+  background: #ccf9f4;
+  color: #44b955;
+  padding: 4px 8px;
+  z-index: 1;
+  border-radius: 4px;
+}
+
+.introduction-products .product-item .product-container a .product-image .out-of-stock  {
+  font-size: 14px;
+  color: #000000;
+  position: absolute;
+  bottom: 0px;
+  background: #ffbdb0;
+  padding: 2px 14px;
+  border-radius: 4px;
+  font-weight: bold;
+  right: 50%;
+  transform: translate(50%, 0px);
+}
+
+.introduction-products .product-item .product-container a .product-info .product-title .product-name {
+  background-color: transparent;
+  color: #333;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  border-radius: 0;
+}
+
+.introduction-products .product-item .product-container a .product-info .product-sku {
+  color: #333;
+}
+
+.introduction-products .product-item .product-container a .product-info .product-price {
+  font-size: 1.25rem;
+  color: #44b955;
+}
+
+.introduction-products .product-item .product-container .product-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: .75rem;
+}
+
+.introduction-products .product-item .product-container .product-control button, .all-add-new-products, .all-add-discount-products {
+  border: solid 1px #44b955;
+  width: 100%;
+  height: 45px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.introduction-products .product-item .product-container .product-control button:focus {
+  outline: none;
+}
+
+.introduction-products .product-item .product-container .product-control button.add-product {
+  background-color: #44b955;
+  color: #fff;
+}
+
+.all-add-new-products, .all-add-discount-products {
+  background-color: #44b955;
+  color: #fff;
+  max-width: 180px;
+}
+
+.all-add-new-products:focus, .all-add-discount-products:focus {
+  outline: none;
+}
+
+.introduction-products .product-item .product-container .product-control button.import-product {
+  background-color: transparent;
+  color: #44b955;
+}
+
+.text-green {
+  color: #44b955 !important;
+}
+
+#confirm-modal-body h5, #fail-modal-body h5 {
+  margin: 0px;
+  line-height: 1.5;
+}
+
+#all-products, #new-products, #discount-products {
+  position: relative;
+}
+
+.left-arrow {
+  position: absolute;
+  left: 0px;
+  z-index: 1;
+  top: 50%;
+  transform: translate(10px, -50%);
+  cursor: pointer;
+}
+
+.right-arrow {
+  position: absolute;
+  right: 0px;
+  z-index: 1;
+  top: 50%;
+  transform: translate(-10px, -50%);
+  cursor: pointer;
+}
+
+@media (hover:none) {
+  .modal.fade.show {
+    padding: 0;
+  }
+}

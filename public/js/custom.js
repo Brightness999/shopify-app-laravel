@@ -669,6 +669,137 @@ $(document).ready(function () {
         }, 1000);
         return false;
     });
+
+    window.addEventListener('resize', function () {
+        if (pathname == '/search-products' || pathname == '/amdin/orders') {
+            if (window.outerWidth > 768) {
+                document.querySelector('#loading').style.right = `${document.querySelector('.maincontent').scrollWidth / 2}px`;
+            } else {
+                document.querySelector('#loading').style.right = `${document.querySelector('.maincontent').scrollWidth / 2}px`;
+            }
+        }
+        if (pathname == '/introduction') {
+            if (document.documentElement.offsetWidth < 640) {
+                $('#products-page-size').val(2);
+                $('.introduction-products').css('grid-template-columns', 'minmax(220px, 1fr) minmax(220px, 1fr)');
+                if (!is_loading) {
+                    $('.product-item').remove();
+                    $('.right-arrow').hide();
+                    $('.left-arrow').hide();
+                    introductionProducts();
+                }
+            } else if (document.documentElement.offsetWidth < 900) {
+                $('#products-page-size').val(3);
+                $('.introduction-products').css('grid-template-columns', 'minmax(220px, 1fr) minmax(220px, 1fr) minmax(220px, 1fr)');
+                if (!is_loading) {
+                    $('.product-item').remove();
+                    $('.right-arrow').hide();
+                    $('.left-arrow').hide();
+                    introductionProducts();
+                }
+            } else if (document.documentElement.offsetWidth < 1024) {
+                $('#products-page-size').val(4);
+                $('.introduction-products').css('grid-template-columns', 'minmax(220px, 1fr) minmax(220px, 1fr) minmax(220px, 1fr) minmax(220px, 1fr)');
+                if (!is_loading) {
+                    $('.product-item').remove();
+                    $('.right-arrow').hide();
+                    $('.left-arrow').hide();
+                    introductionProducts();
+                }
+            } else if (document.documentElement.offsetWidth < 1360) {
+                $('#products-page-size').val(3);
+                $('.introduction-products').css('grid-template-columns', 'minmax(220px, 1fr) minmax(220px, 1fr) minmax(220px, 1fr)');
+                if (!is_loading) {
+                    $('.product-item').remove();
+                    $('.right-arrow').hide();
+                    $('.left-arrow').hide();
+                    introductionProducts();
+                }
+            } else if (document.documentElement.offsetWidth < 1680) {
+                $('#products-page-size').val(4);
+                $('.introduction-products').css('grid-template-columns', 'minmax(220px, 1fr) minmax(220px, 1fr) minmax(220px, 1fr) minmax(220px, 1fr)');
+                if (!is_loading) {
+                    $('.product-item').remove();
+                    $('.right-arrow').hide();
+                    $('.left-arrow').hide();
+                    introductionProducts();
+                }
+            } else {
+                $('#products-page-size').val(5);
+                $('.introduction-products').css('grid-template-columns', 'minmax(220px, 1fr) minmax(220px, 1fr) minmax(220px, 1fr) minmax(220px, 1fr) minmax(220px, 1fr)');
+                if (!is_loading) {
+                    $('.product-item').remove();
+                    $('.right-arrow').hide();
+                    $('.left-arrow').hide();
+                    introductionProducts();
+                }
+            }
+        }
+    })
+
+    if (pathname == '/introduction') {
+        setLoading();
+        if (document.documentElement.offsetWidth < 640) {
+            $('#products-page-size').val(2);
+            $('.introduction-products').css('grid-template-columns', 'minmax(220px, 1fr) minmax(220px, 1fr)');
+            introductionProducts();
+        } else if (document.documentElement.offsetWidth < 900) {
+            $('#products-page-size').val(3);
+            $('.introduction-products').css('grid-template-columns', 'minmax(220px, 1fr) minmax(220px, 1fr) minmax(220px, 1fr)');
+            introductionProducts();
+        } else if (document.documentElement.offsetWidth < 1024) {
+            $('#products-page-size').val(4);
+            $('.introduction-products').css('grid-template-columns', 'minmax(220px, 1fr) minmax(220px, 1fr) minmax(220px, 1fr) minmax(220px, 1fr)');
+            introductionProducts();
+        } else if (document.documentElement.offsetWidth < 1360) {
+            $('#products-page-size').val(3);
+            $('.introduction-products').css('grid-template-columns', 'minmax(220px, 1fr) minmax(220px, 1fr) minmax(220px, 1fr)');
+            introductionProducts();
+        } else if (document.documentElement.offsetWidth < 1680) {
+            $('#products-page-size').val(4);
+            $('.introduction-products').css('grid-template-columns', 'minmax(220px, 1fr) minmax(220px, 1fr) minmax(220px, 1fr) minmax(220px, 1fr)');
+            introductionProducts();
+        } else {
+            $('#products-page-size').val(5);
+            $('.introduction-products').css('grid-template-columns', 'minmax(220px, 1fr) minmax(220px, 1fr) minmax(220px, 1fr) minmax(220px, 1fr) minmax(220px, 1fr)');
+            introductionProducts();
+        }
+        document.addEventListener('scroll', function(e) {
+            if (e.target.scrollingElement.scrollHeight - e.target.scrollingElement.clientHeight - e.target.scrollingElement.scrollTop < 1) {
+                if (!is_loading) {
+                    introductionAllProducts($('#all-products-page-number').val());
+                }
+            }
+        })
+    }
+
+    if (pathname == '/new-products') {
+        $('.introduction-products').css('grid-template-columns', 'repeat(auto-fill, minmax(220px, 1fr))');
+        $('.introduction-products').css('background-color', 'transparent');
+        setLoading();
+        newProducts(0);
+        document.addEventListener('scroll', function(e) {
+            if (e.target.scrollingElement.scrollHeight - e.target.scrollingElement.clientHeight - e.target.scrollingElement.scrollTop < 1) {
+                if (!is_loading) {
+                    newProducts($('#products-page-number').val());
+                }
+            }
+        })
+    }
+
+    if (pathname == '/discount-products') {
+        $('.introduction-products').css('grid-template-columns', 'repeat(auto-fill, minmax(220px, 1fr))');
+        $('.introduction-products').css('background-color', 'transparent');
+        setLoading();
+        discountProducts(0);
+        document.addEventListener('scroll', function(e) {
+            if (e.target.scrollingElement.scrollHeight - e.target.scrollingElement.clientHeight - e.target.scrollingElement.scrollTop < 1) {
+                if (!is_loading) {
+                    discountProducts($('#products-page-number').val());
+                }
+            }
+        })
+    }
 })
 
 function getAction() {
@@ -1400,6 +1531,387 @@ function showImportProducts (data) {
     });
 }
 
+function introductionNewProducts(page_number) {
+    is_loading = true;
+    $.getJSON('/ajax', {
+        action: 'introduction-new-products',
+        page_number: page_number,
+        page_size: $('#products-page-size').val(),
+    }, function(res) {
+        $('#new-products-page-number').val(page_number);
+        let str = '';
+        res.new_products.forEach(new_product => {
+            let images = JSON.parse(new_product.images);
+            let img_str = `<img src="/img/default_image_165.png" class="main-image">`;
+            if (images != null) {
+                if (images.length > 0) {
+                    if (images[0].file != '') {
+                        img_str = `<img src="https://m.gdss.us/media/catalog/product/cache/6af2da79007bbde83ac425b5e09ddcd4/${images[0].file}" class="main-image">`;
+                    }
+                }
+            }
+            str += `<li id="" class="product-item">
+                <div class="product-container">
+                    <a id="${new_product.sku}" class="product-details" href="search-products/${new_product.sku}" target="_blank">
+                        <div class="product-image">
+                            ${img_str}
+                            <span class="new-sticker">New Item</span>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-title" title="${new_product.name}">
+                                <p class="simple-tooltip product-name" title="${new_product.name}">${new_product.name}</p>
+                            </div>
+                            <div class="product-sku">
+                                <strong>SKU:</strong> ${new_product.sku}
+                            </div>
+                            <div class="product-price">
+                                <span>US $${parseFloat(new_product.price).toFixed(2)}</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </li>`;
+        });
+        $('.introduction-products.new-products').html(str);
+        Tipped.create('.simple-tooltip');
+        if (page_number == 0) {
+            $('#new-products .left-arrow').removeClass('d-none');
+            $('#new-products .right-arrow').removeClass('d-none');
+            setTimeout(() => {
+                removeLoading();
+            }, 500);
+        }
+        is_loading = false;
+    })
+}
+
+function introductionDiscountProducts(page_number) {
+    is_loading = true;
+    $.getJSON('/ajax', {
+        action: 'introduction-discount-products',
+        page_number: page_number,
+        page_size: $('#products-page-size').val(),
+    }, function(res) {
+        $('#discount-products-page-number').val(page_number);
+        let str = '';
+        let today = new Date();
+        let date = `${getEndDate(today.getMonth() + 1)}/${today.getMonth() + 1}/${today.getFullYear()}`;
+        res.discount_products.forEach(discount_product => {
+            let images = JSON.parse(discount_product.images);
+            let img_str = `<img src="/img/default_image_165.png" class="main-image">`;
+            if (images != null) {
+                if (images.length > 0) {
+                    if (images[0].file != '') {
+                        img_str = `<img src="https://m.gdss.us/media/catalog/product/cache/6af2da79007bbde83ac425b5e09ddcd4/${images[0].file}" class="main-image">`;
+                    }
+                }
+            }
+            str += `<li id="" class="product-item">
+                <div class="product-container">
+                    <a id="${discount_product.sku}" class="product-details" href="search-products/${discount_product.sku}" target="_blank">
+                        <div class="product-image">
+                            ${img_str}
+                            <span class="new-sticker">-${parseFloat(discount_product.discount).toFixed(2)}%</span>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-title" title="${discount_product.name}">
+                                <p class="simple-tooltip product-name" title="${discount_product.name}">${discount_product.name}</p>
+                            </div>
+                            <div class="product-sku">
+                                <strong>SKU:</strong> ${discount_product.sku}
+                            </div>
+                            <div class="product-sku">
+                                <span><strong>SRP:</strong> US $${parseFloat(discount_product.suggested_retail).toFixed(2)}</span>
+                            </div>
+                            <div class="product-sku">
+                                <span style="text-decoration: line-through; color: #a2a2a2">US $${parseFloat(discount_product.price).toFixed(2)}</span>
+                                <span class="product-price"> US $${parseFloat(discount_product.monthly_special).toFixed(2)}</span>
+                                <span class="simple-tooltip text-white" style="font-size:1rem; padding: 1px 7px;" title="price valid until ${date}"><i class="fa fa-info" aria-hidden="true"></i></span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </li>`;
+        });
+        $('.introduction-products.discount-products').html(str);
+        Tipped.create('.simple-tooltip');
+        if (page_number == 0) {
+            $('#discount-products .left-arrow').removeClass('d-none');
+            $('#discount-products .right-arrow').removeClass('d-none');
+            setTimeout(() => {
+                removeLoading();
+            }, 500);
+        }
+        is_loading = false;
+    })
+}
+
+function newProducts(page_number) {
+    if (page_number > 0) {
+        $('#infinite_loading').remove();
+        is_loading = true;
+        $('.introduction-content').append(`<div class="d-flex justify-content-center" id="infinite_loading"><img src="/img/infinite_loading.gif"></div>`);
+    }
+    $.getJSON('/ajax', {
+        action: 'new-products',
+        page_number: page_number,
+        search_key: $('#search-key').val().trim(),
+        sort_key: $('#sort-key').val()
+    }, function(res) {
+        $('#products-page-number').val(parseInt(page_number) + 1);
+        let str = '';
+        res.new_products.forEach(new_product => {
+            let images = JSON.parse(new_product.images);
+            let img_str = `<img src="/img/default_image_165.png" class="main-image" style="opacity: ${new_product.stock == 0 ? 0.5 : 1}">`;
+            if (images != null) {
+                if (images.length > 0) {
+                    if (images[0].file != '') {
+                        img_str = `<img src="https://m.gdss.us/media/catalog/product/cache/6af2da79007bbde83ac425b5e09ddcd4/${images[0].file}" class="main-image" style="opacity: ${new_product.stock == 0 ? 0.5 : 1}">`;
+                    }
+                }
+            }
+            let button_str = `<button id="add-${new_product.sku}" data-sku="${new_product.sku}" type="submit" class="add-product cel-icon-plus">Add to Import List</button>`;
+            let check_str = `<input type="checkbox" id="check-${new_product.sku}" data-sku="${new_product.sku}" class="check-product">`;
+            res.imported_products.forEach(sku => {
+                if (new_product.sku == sku) {
+                    button_str = `<button id="import-${new_product.sku}" data-sku="${new_product.sku}" class="import-product">Edit in Import List</button>`;
+                    check_str = `<input type="checkbox" id="check-${new_product.sku}" disabled>`;
+                }
+            });
+            str += `<li id="" class="product-item py-0">
+                ${check_str}
+                <div class="product-container">
+                    <a id="${new_product.sku}" class="product-details" href="search-products/${new_product.sku}" target="_blank">
+                        <div class="product-image">
+                            <div>
+                                ${img_str}
+                                <span class="new-sticker">New Item</span>
+                                <span class="out-of-stock ${new_product.stock == 0 ? 'd-block' : 'd-none'}">Out of Stock</span>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-title" title="${new_product.name}">
+                                <p class="simple-tooltip product-name" title="${new_product.name}">${new_product.name}</p>
+                            </div>
+                            <div class="product-sku">
+                                <strong>SKU:</strong> ${new_product.sku}
+                            </div>
+                            <div class="product-price">
+                                <span>US $${parseFloat(new_product.price).toFixed(2)}</span>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="product-control">
+                        ${button_str}
+                    </div>
+                </div>
+            </li>`;
+        });
+        Tipped.create('.simple-tooltip');
+        setTimeout(() => {
+            $('#infinite_loading').remove();
+            if (page_number == 0) {
+                $('.introduction-products').html(str);
+                Tipped.create('.simple-tooltip');
+            } else {
+                $('.introduction-products').append(str);
+                Tipped.create('.simple-tooltip');
+            }
+            if (res.new_products.length == 60) {
+                is_loading = false;
+            } else {
+                is_loading = true;
+            }
+        }, 1000);
+        if (page_number == 0) {
+            setTimeout(() => {
+                removeLoading();
+            }, 1000);
+        }
+    })
+}
+
+function discountProducts(page_number) {
+    if (page_number > 0) {
+        $('#infinite_loading').remove();
+        is_loading = true;
+        $('.introduction-content').append(`<div class="d-flex justify-content-center" id="infinite_loading"><img src="/img/infinite_loading.gif"></div>`);
+    }
+    $.getJSON('/ajax', {
+        action: 'discount-products',
+        page_number: page_number,
+        search_key: $('#search-key').val().trim(),
+        sort_key: $('#sort-key').val()
+    }, function(res) {
+        $('#products-page-number').val(parseInt(page_number) + 1);
+        let str = '';
+        res.discount_products.forEach(discount_product => {
+            let images = JSON.parse(discount_product.images);
+            let img_str = `<img src="/img/default_image_165.png" class="main-image" style="opacity: ${discount_product.stock == 0 ? 0.5 : 1}">`;
+            if (images != null) {
+                if (images.length > 0) {
+                    if (images[0].file != '') {
+                        img_str = `<img src="https://m.gdss.us/media/catalog/product/cache/6af2da79007bbde83ac425b5e09ddcd4/${images[0].file}" class="main-image" style="opacity: ${discount_product.stock == 0 ? 0.5 : 1}">`;
+                    }
+                }
+            }
+            let button_str = `<button id="add-${discount_product.sku}" data-sku="${discount_product.sku}" type="submit" class="add-product cel-icon-plus">Add to Import List</button>`;
+            let check_str = `<input type="checkbox" id="check-${discount_product.sku}" data-sku="${discount_product.sku}" class="check-product">`;
+            res.imported_products.forEach(sku => {
+                if (discount_product.sku == sku) {
+                    button_str = `<button id="import-${discount_product.sku}" data-sku="${discount_product.sku}" class="import-product">Edit in Import List</button>`;
+                    check_str = `<input type="checkbox" id="check-${discount_product.sku}" disabled>`;
+                }
+            });
+            let today = new Date();
+            let date = `${getEndDate(today.getMonth() + 1)}/${today.getMonth() + 1}/${today.getFullYear()}`;
+            str += `<li id="" class="product-item py-0">
+                ${check_str}
+                <div class="product-container">
+                    <a id="${discount_product.sku}" class="product-details" href="search-products/${discount_product.sku}" target="_blank">
+                        <div class="product-image">
+                            <div>
+                                ${img_str}
+                                <span class="new-sticker">-${parseFloat(discount_product.discount).toFixed(2)}%</span>
+                                <span class="out-of-stock ${discount_product.stock == 0 ? 'd-block' : 'd-none'}">Out of Stock</span>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-title" title="${discount_product.name}">
+                                <p class="simple-tooltip product-name" title="${discount_product.name}">${discount_product.name}</p>
+                            </div>
+                            <div class="product-sku">
+                                <strong>SKU:</strong> ${discount_product.sku}
+                            </div>
+                            <div class="product-sku">
+                                <span><strong>SRP:</strong> US $${parseFloat(discount_product.suggested_retail).toFixed(2)}</span>
+                            </div>
+                            <div class="product-sku">
+                                <span style="text-decoration: line-through; color: #a2a2a2">US $${parseFloat(discount_product.price).toFixed(2)}</span>
+                                <span class="product-price"> US $${parseFloat(discount_product.monthly_special).toFixed(2)}</span>
+                                <span class="simple-tooltip text-white" style="font-size:1rem; padding: 1px 7px;" title="price valid until ${date}"><i class="fa fa-info" aria-hidden="true"></i></span>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="product-control">
+                        ${button_str}
+                    </div>
+                </div>
+            </li>`;
+        });
+        setTimeout(() => {
+            $('#infinite_loading').remove();
+            if (page_number == 0) {
+                $('.introduction-products').html(str);
+                Tipped.create('.simple-tooltip');
+            } else {
+                $('.introduction-products').append(str);
+                Tipped.create('.simple-tooltip');
+            }
+            if (res.discount_products.length == 60) {
+                is_loading = false;
+            } else {
+                is_loading = true;
+            }
+        }, 1000);
+        if (page_number == 0) {
+            setTimeout(() => {
+                removeLoading();
+            }, 1000);
+        }
+    })
+}
+
+function introductionAllProducts(page_number) {
+    is_loading = true;
+    if (page_number > 0) {
+        $('#infinite_loading').remove();
+        is_loading = true;
+        $('#all-products').append(`<div class="d-flex justify-content-center" id="infinite_loading"><img src="/img/infinite_loading.gif"></div>`);
+    }
+    $.getJSON('/ajax', {
+        action: 'introduction-all-products',
+        page_number: page_number,
+        page_size: $('#products-page-size').val()*2,
+    }, function(res) {
+        $('#all-products-page-number').val(parseInt(page_number) + 1);
+        let str = '';
+        res.new_products.forEach(new_product => {
+            let images = JSON.parse(new_product.images);
+            let img_str = `<img src="/img/default_image_165.png" class="main-image">`;
+            if (images != null) {
+                if (images.length > 0) {
+                    if (images[0].file != '') {
+                        img_str = `<img src="https://m.gdss.us/media/catalog/product/cache/6af2da79007bbde83ac425b5e09ddcd4/${images[0].file}" class="main-image">`;
+                    }
+                }
+            }
+            str += `<li id="" class="product-item">
+                <div class="product-container">
+                    <a id="${new_product.sku}" class="product-details" href="search-products/${new_product.sku}" target="_blank">
+                        <div class="product-image">
+                            ${img_str}
+                        </div>
+                        <div class="product-info">
+                            <div class="product-title" title="${new_product.name}">
+                                <p class="simple-tooltip product-name" title="${new_product.name}">${new_product.name}</p>
+                            </div>
+                            <div class="product-sku">
+                                <strong>SKU:</strong> ${new_product.sku}
+                            </div>
+                            <div class="product-price">
+                                <span>US $${parseFloat(new_product.price).toFixed(2)}</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </li>`;
+        });
+        setTimeout(() => {
+            $('#infinite_loading').remove();
+            if (page_number == 0) {
+                $('.introduction-products.all-products').html(str);
+                Tipped.create('.simple-tooltip');
+            } else {
+                $('.introduction-products.all-products').append(str);
+                Tipped.create('.simple-tooltip');
+            }
+            if (res.new_products.length == $('#products-page-size').val() * 2) {
+                is_loading = false;
+            } else {
+                is_loading = true;
+            }
+        }, 500);
+        if (page_number == 0) {
+            setTimeout(() => {
+                removeLoading();
+            }, 500);
+        }
+    })
+}
+
+function introductionProducts() {
+    introductionAllProducts(0);
+    introductionNewProducts(0);
+    introductionDiscountProducts(0);
+}
+
+function getEndDate(month) {
+    let today = new Date();
+    let year = today.getFullYear();
+    if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12) {
+        return 31;
+    } else if (month == 2) {
+        if (year%4 == 0 && year%400 != 0) {
+            return 29;
+        } else {
+            return 28;
+        }
+    } else {
+        return 30;
+    }
+}
+
 function pageNumberClick (page_number) {
     var parameters = {
         action: getAction(),
@@ -1415,6 +1927,39 @@ function uncheckAllProducts () {
     $('#select-all').show();
     $('#selected-products').text(0);
     $('#selected-products').hide();
+}
+
+function showBulkActionButtons () {
+    let count = 0;
+    $("input.checkbox:checked").each(function(index, ele) {
+        count++;
+    });
+    $('#selected-products').text(count);
+    if ($('#selected-products').text() <= 0) {
+        $('#check-all-products').prop('checked', false);
+        $('#select-all').css('display', 'block');
+        $('#selected-products').css('display', 'none');
+    } else {
+        if (!$('#check-all-products').is(':disabled')) {
+            $('#check-all-products').prop('checked', true);
+            if ($('#selected-products').text() < 10) {
+                $('#selected-products').css('padding', '0px 10px');
+            } else {
+                $('#selected-products').css('padding', '0px 5px');
+            }
+            $('#select-all').css('display', 'none');
+            $('#selected-products').css('display', 'block');
+        }
+    }
+}
+
+function popupFailMsg(msg) {
+    $('body').append('<div id="fade-background"></div>');
+    $('#product-fail-text').html(msg);
+    $('#product-fail').css('display', 'block');
+    setTimeout(() => {
+        $('#product-fail').addClass('show');
+    }, 150);
 }
 
 function setLoading() {

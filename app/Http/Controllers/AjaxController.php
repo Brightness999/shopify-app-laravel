@@ -656,6 +656,124 @@ class AjaxController extends Controller
                 'nonskus' => $nonskus,
             ]);
         }
+
+        if ($parameters['action'] == 'introduction-new-products') {
+            $new_products = Products::where('created_at', '>', date('Y-m-d', strtotime('-2 months')))
+                ->where('stock', '>', 0)
+                ->orderBy('created_at', 'DESC')
+                ->skip($parameters['page_size'] * $parameters['page_number'])->take($parameters['page_size'])->get();
+            return json_encode([
+                'new_products' => $new_products,
+            ]);
+        }
+
+        if ($parameters['action'] == 'introduction-all-products') {
+            $new_products = Products::orderBy('sku')->where('stock', '>', 0)
+                ->skip($parameters['page_size'] * $parameters['page_number'])->take($parameters['page_size'])->get();
+            return json_encode([
+                'new_products' => $new_products,
+            ]);
+        }
+        
+        if ($parameters['action'] == 'introduction-discount-products') {
+            $discount_products = Products::select('*', DB::raw('(suggested_retail-monthly_special)/suggested_retail*100 AS discount'))
+                ->where('stock', '>', 0)
+                ->where('monthly_special', '>', 0)
+                ->where('suggested_retail', '>', 0)
+                ->where(DB::raw('(suggested_retail-monthly_special)/suggested_retail*100'), '>', 0)
+                ->orderBy('discount')
+                ->skip($parameters['page_size'] * $parameters['page_number'])->take($parameters['page_size'])->get();
+            return json_encode([
+                'discount_products' => $discount_products,
+            ]);
+        }
+
+        if ($parameters['action'] == 'new-products') {
+            $new_products = Products::where('created_at', '>', date('Y-m-d', strtotime('-2 months')))->where('stock', '>', 0);
+            if ($parameters['search_key'] != '') {
+                if (substr($parameters['search_key'], -1) == ',') {
+                    $search_key = substr($parameters['search_key'], 0, -1);
+                } else {
+                    $search_key = $parameters['search_key'];
+                }
+                $search_keys = [];
+                foreach (explode(',', $search_key) as $keys) {
+                    foreach (explode(' ', trim($keys)) as $key) {
+                        $search_keys[] = $key;
+                    }
+                }
+                foreach ($search_keys as $search_key) {
+                    $new_products = $new_products->where('name', 'like', '%'.$search_key.'%');
+                }
+                $new_products = $new_products->distinct();
+            }
+            if ($parameters['sort_key'] != '') {
+                if ($parameters['sort_key'] == 'a-z') {
+                    $new_products = $new_products->orderBy('name');
+                } else if ($parameters['sort_key'] == 'z-a') {
+                    $new_products = $new_products->orderBy('name', 'DESC');
+                } else if ($parameters['sort_key'] == 'l-h') {
+                    $new_products = $new_products->orderBy('price');
+                } else if ($parameters['sort_key'] == 'h-l') {
+                    $new_products = $new_products->orderBy('price', 'DESC');
+                }
+            } else {
+                $new_products = $new_products->orderBy('created_at', 'DESC');
+            }
+            $new_products = $new_products->skip(60 * $parameters['page_number'])->take(60)->get();
+            $imported_products = Products::select('products.*', 'import_list.id as id_import_list')
+                ->join('import_list', 'import_list.id_product', '=', 'products.id')
+                ->whereNotIn('import_list.id', MyProducts::where('id_customer', Auth::User()->id)->pluck('id_imp_product'))
+                ->where('import_list.id_customer', Auth::user()->id)
+                ->pluck('products.sku');
+            return json_encode([
+                'new_products' => $new_products,
+                'imported_products' => $imported_products
+            ]);
+        }
+        
+        if ($parameters['action'] == 'discount-products') {
+            $discount_products = Products::select('*', DB::raw('(suggested_retail-monthly_special)/suggested_retail*100 AS discount'))
+                ->where('stock', '>', 0)
+                ->where('monthly_special', '>', 0)
+                ->where('suggested_retail', '>', 0)
+                ->where(DB::raw('(suggested_retail-monthly_special)/suggested_retail*100'), '>', 0);
+            if ($parameters['search_key'] != '') {
+                $search_keys = [];
+                foreach (explode(',', $parameters['search_key']) as $keys) {
+                    foreach (explode(' ', trim($keys)) as $key) {
+                        $search_keys[] = $key;
+                    }
+                }
+                foreach ($search_keys as $search_key) {
+                    $discount_products = $discount_products->where('name', 'like', '%'.$search_key.'%');
+                }
+                $discount_products = $discount_products->distinct();
+            }
+            if ($parameters['sort_key'] != '') {
+                if ($parameters['sort_key'] == 'a-z') {
+                    $discount_products = $discount_products->orderBy('name');
+                } else if ($parameters['sort_key'] == 'z-a') {
+                    $discount_products = $discount_products->orderBy('name', 'DESC');
+                } else if ($parameters['sort_key'] == 'l-h') {
+                    $discount_products = $discount_products->orderBy('monthly_special');
+                } else if ($parameters['sort_key'] == 'h-l') {
+                    $discount_products = $discount_products->orderBy('monthly_special', 'DESC');
+                }
+            } else {
+                $discount_products = $discount_products->orderBy('discount');
+            }
+            $discount_products = $discount_products->skip(60 * $parameters['page_number'])->take(60)->get();
+            $imported_products = Products::select('products.*', 'import_list.id as id_import_list')
+                ->join('import_list', 'import_list.id_product', '=', 'products.id')
+                ->whereNotIn('import_list.id', MyProducts::where('id_customer', Auth::User()->id)->pluck('id_imp_product'))
+                ->where('import_list.id_customer', Auth::user()->id)
+                ->pluck('products.sku');
+            return json_encode([
+                'discount_products' => $discount_products,
+                'imported_products' => $imported_products
+            ]);
+        }
     }
 
     public function saveSettings(Request $request)

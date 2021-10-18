@@ -15,9 +15,11 @@ use Illuminate\Support\Facades\Auth;
 
 Auth::routes();
 Route::get('/', 'HomeController@index')->name('home');
+Route::get('/introduction', 'HomeController@introduction');
+Route::get('/new-products', 'HomeController@newProducts');
+Route::get('/discount-products', 'HomeController@discountProducts');
 Route::get('/install', 'CallBackController@index');
 Route::get('/callback', 'CallBackController@callback');
-//Route::get('/callback', 'CallBackController@callback');
 
 Route::group(['prefix' => 'products'], function () {
     Route::get('/', 'ProductListController@index');

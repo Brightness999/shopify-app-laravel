@@ -19,7 +19,7 @@ class CallBackController extends Controller
         $user = User::where('shopify_url', $request->input('shop'))->first();
         $mode = '';
 
-        if (!empty($user)) {
+        if (!$user) {
             $mode = 'per-user';
         }
 
@@ -46,7 +46,7 @@ class CallBackController extends Controller
 
             if (!$user) {
                 $user = new User();
-                $user->name = $result['associated_user']['first_name'] . $result['associated_user']['last_name'];
+                $user->name = $result['associated_user']['first_name'] .' '. $result['associated_user']['last_name'];
                 $user->email = $result['associated_user']['email'];
                 $user->password = Hash::make('password');
                 $user->shopify_url =  $params['shop'];
@@ -66,7 +66,6 @@ class CallBackController extends Controller
 
 
                 auth()->login($user); // Login and "remember" the given user...
-                return redirect('https://' . $user->shopify_url . '/admin/apps');
             } else {
                 $user->shopify_token = $result['access_token'];
                 $user->save();
@@ -75,8 +74,11 @@ class CallBackController extends Controller
 
 
             }
-
-            return redirect()->home();
+            if ($user->plan == 'basic' || $user->plan == 'advanced') {
+                return redirect('/import-list');
+            } else {
+                return redirect('/introduction');
+            }
         } else {
             die('This request is NOT from Shopify!');
         }

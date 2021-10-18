@@ -55,6 +55,21 @@ class HomeController extends Controller
         ));
     }
 
+    public function introduction()
+    {
+        return view('introduction');
+    }
+
+    public function newProducts()
+    {
+        return view('products', ['type' => 'new']);
+    }
+
+    public function discountProducts()
+    {
+        return view('products', ['type' => 'discount']);
+    }
+
     protected function checkWebhook()
     {
         $result = ShopifyAdminApi::getWebhooksList(Auth::user());
