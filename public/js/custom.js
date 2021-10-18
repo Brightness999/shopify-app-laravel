@@ -88,23 +88,18 @@ $(document).ready(function () {
     })
 
     /* ADMIN ORDER DETAIL */
-    $('#btnNotes').click(function () {
-        var texto = $('textarea.ta' + $(this).data('id')).val()
+    $('#btnNotes').click(function (e) {
+        var texto = $(`textarea.ta${e.target.dataset.id}`).val()
         var parameters = {
             action: 'update_notes',
-            id_order: $(this).data('id'),
-            notes: ' ' + texto
+            id_order: e.target.dataset.id,
+            notes: texto
         }
-
         $.getJSON(ajax_link, parameters, function (data) {
-            $('textarea.ta' + $(this).data('id')).val(' ' + texto);
-            $('#confirm-modal-body').html(`<h5>The notes have been updated successfully</h5>`);
-            $('#confirm-modal-footer').hide();
-            $('#confirm-modal').css('display', 'block');
-            $('#confirm-modal').addClass('show');
+            $(`textarea.ta${e.target.dataset.id}`).val(data.notes);
+            $('#success-note').removeClass('d-none');
             setTimeout(() => {
-                $('#confirm-modal').css('display', 'none');
-                $('#confirm-modal').removeClass('show');
+                $('#success-note').addClass('d-none');
             }, 2000);
         })
     })
@@ -456,18 +451,21 @@ $(document).ready(function () {
 
     $('#merchant_name').keydown(function(e) {
         let length = e.target.value.length;
+        let merchant_name = e.target.value;
         if (e.key) {
             if (e.key.length == 1) {
                 length += 1;
+                merchant_name += e.key;
             } else {
                 if (e.code == 'Backspace') {
                     length -= 1;
+                    merchant_name = merchant_name.slice(0, -1);
                 }
             }
-            if (length > 2) {
+            if (length > 2 && (e.key.length == 1 || e.key == 'Backspace')) {
                 $.getJSON(ajax_link, {
                     action: 'admin-merchant-name',
-                    name: $('#merchant_name').val()
+                    name: merchant_name
                 }, function(res) {
                     var str = '<div id="name_data">';
                     res.names.forEach(name => {
@@ -482,20 +480,24 @@ $(document).ready(function () {
             }
         }
     });
+
     $('#merchant_email').keydown(function(e) {
         let length = e.target.value.length;
+        let merchant_email = e.target.value;
         if (e.key) {
             if (e.key.length == 1) {
                 length += 1;
+                merchant_email += e.key;
             } else {
                 if (e.code == 'Backspace') {
                     length -= 1;
+                    merchant_email = merchant_email.slice(0, -1);
                 }
             }
-            if (length > 2) {
+            if (length > 2 && (e.key.length == 1 || e.key == 'Backspace')) {
                 $.getJSON(ajax_link, {
                     action: 'admin-merchant-email',
-                    email: $('#merchant_email').val()
+                    email: merchant_email
                 }, function(res) {
                     var str = '<div id="email_data">';
                     res.emails.forEach(email => {
@@ -510,20 +512,24 @@ $(document).ready(function () {
             }
         }
     });
+    
     $('#merchant_url').keydown(function(e) {
         let length = e.target.value.length;
+        let merchant_url = e.target.value;
         if (e.key) {
             if (e.key.length == 1) {
                 length += 1;
+                merchant_url += e.key;
             } else {
                 if (e.code == 'Backspace') {
                     length -= 1;
+                    merchant_url = merchant_url.slice(0, -1);
                 }
             }
-            if (length > 2) {
+            if (length > 2 && (e.key.length == 1 || e.key == 'Backspace')) {
                 $.getJSON(ajax_link, {
                     action: 'admin-merchant-url',
-                    url: $('#merchant_url').val()
+                    url: merchant_url
                 }, function(res) {
                     var str = '<div id="url_data">';
                     res.urls.forEach(url => {
@@ -538,36 +544,53 @@ $(document).ready(function () {
             }
         }
     });
+    
     $('#merchant_name').change(function(e) {
         getMerchantData();
     })
+    
     $('#merchant_email').change(function(e) {
         getMerchantData();
     })
+    
     $('#merchant_url').change(function(e) {
         getMerchantData();
     })
+    
     $('#merchant_plan').change(function(e) {
         getMerchantData();
     })
+    
     $('#merchant_active').change(function(e) {
         getMerchantData();
     })
 
+    $('.merchant-reset').click(function() {
+        $('#merchant_name').val('');
+        $('#merchant_email').val('');
+        $('#merchant_url').val('');
+        $('#merchant_plan').val('');
+        $('#merchant_active').val('');
+        getMerchantData();
+    });
+
     $('#user_name').keydown(function(e) {
         let length = e.target.value.length;
+        let name = e.target.value;
         if (e.key) {
             if (e.key.length == 1) {
                 length += 1;
+                name += e.key;
             } else {
                 if (e.code == 'Backspace') {
                     length -= 1;
+                    name = name.slice(0, -1);
                 }
             }
-            if (length > 2) {
+            if (length > 2 && (e.key.length == 1 || e.key == 'Backspace')) {
                 $.getJSON(ajax_link, {
                     action: 'admin-user-name',
-                    name: $('#user_name').val()
+                    name: name
                 }, function(res) {
                     var str = '<div id="name_data">';
                     res.names.forEach(name => {
@@ -585,18 +608,21 @@ $(document).ready(function () {
 
     $('#user_email').keydown(function(e) {
         let length = e.target.value.length;
+        let user_email = e.target.value;
         if (e.key) {
             if (e.key.length == 1) {
                 length += 1;
+                user_email += e.key;
             } else {
                 if (e.code == 'Backspace') {
                     length -= 1;
+                    user_email = user_email.slice(0, -1);
                 }
             }
-            if (length > 2) {
+            if (length > 2 && (e.key.length == 1 || e.key == 'Backspace')) {
                 $.getJSON(ajax_link, {
                     action: 'admin-user-email',
-                    email: $('#user_email').val()
+                    email: user_email
                 }, function(res) {
                     var str = '<div id="email_data">';
                     res.emails.forEach(email => {
@@ -629,6 +655,13 @@ $(document).ready(function () {
     $('#user_active').change(function(e) {
         getMerchantData();
     });
+
+    $('.user-reset').click(function() {
+        $('#user_name').val('');
+        $('#user_email').val('');
+        $('#user_active').val('');
+        getMerchantData();
+    })
 
     $(".btn-order-search").click(function() {
         var flag = orderSearchPermission();
@@ -784,10 +817,6 @@ function getMerchantData() {
 function showUsers(users) {
     var str = '';
     users.forEach(user => {
-        var active_str = `<input type="checkbox" name="switch-button" id="switch-label${user.id}" class="switch-button__checkbox">`;
-        if (user.active) {
-            active_str = `<input type="checkbox" name="switch-button" id="switch-label${user.id}" class="switch-button__checkbox" checked>`;
-        }
         str += `<tr class="userdatarow">
             <td data-label="USER NAME">
                 ${user.name}
@@ -796,15 +825,18 @@ function showUsers(users) {
                 ${user.email}
             </td>
             <td data-label="ACTIVE">
-                ${active_str}
+                <input type="checkbox" name="switch-button" id="switch-label${user.id}" data-userid="${user.id}" data-toggle="modal" data-target="#confirm-modal" class="switch-button__checkbox change-status" ${user.active && 'checked'}>
             </td>
-            <td>
-                <a href="/admin/merchants/show/${user.id}"><button class="view greenbutton">View</button></a>
+            <td class="d-flex">
+                <button class="view mx-2 greenbutton admin-user-view" data-userid="${user.id}">View</button>
             </td>
         </tr>`;
     });
     $('.userdatarow').remove();
     $('#user_data').html(str);
+    setTimeout(() => {
+        window.scrollTo(0,0);
+    }, 500);
 }
 
 function adminOrderSearchPermission() {
@@ -880,14 +912,20 @@ function showMerchants (merchants) {
             <td data-label="ACTIVE">
                 <input type="checkbox" name="switch-button" id="switch-label${merchant.id}" data-merchantid="${merchant.id}" data-toggle="modal" data-target="#confirm-modal" class="switch-button__checkbox change-status" ${merchant.active && 'checked'}>
             </td>
-            <td class="btngroup">
-                <button class="view greenbutton detail-merchants" data-merchantid="${merchant.id}">View</button>
-                <button class="vieworder orders-customers" data-merchantid="${merchant.id}">Orders</button>
+            <td>
+                <div class="btngroup">
+                    <button class="view greenbutton detail-merchants mx-2" data-merchantid="${merchant.id}">View</button>
+                    <button class="vieworder mx-2 ${merchant.order_count ? 'orders-customers' : 'simple-tooltip'}" title="${merchant.order_count ? '' : 'No Orders'}" data-merchantid="${merchant.id}">Orders</button>
+                </div>
             </td>
         </tr>`;
     });
     $('.merchantrow').remove();
     $('#merchant_data').html(str);
+    Tipped.create('.simple-tooltip');
+    setTimeout(() => {
+        window.scrollTo(0,0);
+    }, 500);
 }
 
 function bringProducts (data) {

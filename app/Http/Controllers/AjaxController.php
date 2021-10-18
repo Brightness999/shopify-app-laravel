@@ -155,7 +155,7 @@ class AjaxController extends Controller
         if ($parameters['action'] == 'admin-users') {
             $page_number = $parameters['page_number'];
             $page_size = $parameters['page_size'];
-            $users = User::where('role', 'admin');
+            $users = User::where('role', 'admin')->where('id', '!=', Auth::user()->id);
             if ($parameters['name'] != '') {
                 $users = $users->where('name', 'like', '%' . $parameters['name'] . '%');
             }
@@ -507,6 +507,10 @@ class AjaxController extends Controller
             }
             $total_count = $merchants_list->count();
             $merchants_list = $merchants_list->skip(($page_number - 1) * $page_size)->take($page_size)->get();
+            foreach ($merchants_list as $merchant) {
+                $order_count = Order::select('*')->where('id_customer', $merchant->id)->count();
+                $merchant->order_count = $order_count;
+            }
             return json_encode([
                 'merchants' => $merchants_list,
                 'page_number' => $page_number,

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\ShopifyStore;
-use Illuminate\Http\Request;
 use App\User;
 
 class AdminMerchantsController extends Controller
@@ -20,16 +19,13 @@ class AdminMerchantsController extends Controller
 
     public function index()
     {
-        $merchants_list = User::select('users.*')
-            ->where('role', 'merchant')
-            ->orderBy('users.id', 'asc');
-        $total_count = $merchants_list->count();
-        $merchants_list = $merchants_list->take(10)->get();
-
         $this->authorize('view-admin-merchants');
+        $merchants_list = User::select('users.*')
+            ->where('role', 'merchant');
+
         return view('admin_merchants', array(
-            'merchants_list' => $merchants_list,
-            'total_count' => $total_count
+            'merchants_list' => $merchants_list->get(),
+            'total_count' => $merchants_list->count()
         ));
     }
 
@@ -41,44 +37,5 @@ class AdminMerchantsController extends Controller
             'merchant' => $merchant,
             'shopify_data' => count($shopify_data) ? $shopify_data[0] : []
         ));
-    }
-
-    public function exportCSV()
-    {
-
-        $now = gmdate("D, d M Y H:i:s");
-        header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
-        header("Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate");
-        header("Last-Modified: {$now} GMT");
-
-        // force download
-        header("Content-Type: application/force-download");
-        header("Content-Type: application/octet-stream");
-        header("Content-Type: application/download");
-
-        // disposition / encoding on response body
-        header("Content-Disposition: attachment;filename=merchants.csv");
-        header("Content-Transfer-Encoding: binary");
-
-        $merchants = User::select(
-            'users.name',
-            'users.email',
-            'users.shopify_url',
-            'users.role',
-            'users.plan',
-            'users.active',
-            'users.created_at'
-        )
-            ->where('role', 'merchant')->get()->toArray();
-        ob_start();
-        $df = fopen("php://output", 'w');
-
-        fputcsv($df, array_keys(reset($merchants)));
-        foreach ($merchants as $merchant) {
-            fwrite($df, implode(",", $merchant) . "\n");
-        }
-        fclose($df);
-        echo ob_get_clean();
-        die();
     }
 }
