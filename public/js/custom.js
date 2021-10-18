@@ -427,8 +427,27 @@ $(document).ready(function () {
     })
 
     $('.migration').click(function () {
+        $('body').append('<div class="modal-backdrop fade show"></div>');
+        $('#migrate-products-modal').css('display', 'block');
+        setTimeout(() => {
+            $('#migrate-products-modal').addClass('show');
+        }, 150);
+        $('#migration-body').html('<progress id="migrating-progress" max="100" value="0" style="width:100%;">0%</progress><p id="percentage"></p>');
         $.getJSON(ajax_link, {action: 'migration-count'}, function (res) {
-            bringProducts(res);
+            if (res.error) {
+                $('#migration-body').html(`<h5 style="line-height:1.5" class="my-0">${res.error}</h5>`);
+                setTimeout(() => {
+                    $('#migrate-products-modal').removeClass('show');
+                    $('.bodyFront').removeClass('modal-open');
+                    $('.bodyFront').css('padding-right', 0);
+                }, 4000);
+                setTimeout(() => {
+                    $('#migrate-products-modal').css('display', 'none');
+                    $('.modal-backdrop.fade.show').remove();
+                }, 4150);
+            } else {
+                bringProducts(res);
+            }
         })
     })
 
@@ -679,7 +698,7 @@ function getAction() {
     if (pathname == '/import-list') {
         action = 'import-list';
     }
-    if (pathname == '/migrate-products') {
+    if (pathname == '/merge-inventory') {
         action = 'migrate-products';
     }
     if (pathname == '/admin/orders') {
@@ -892,110 +911,94 @@ function showMerchants (merchants) {
 
 function bringProducts (data) {
     $.getJSON(ajax_link, data, function (res) {
-        var params = {
-            action: 'migration',
-            index: res.index,
-            location_id: res.location_id,
-            total_count: res.total_count,
-            count: res.count,
-        }
-        $('#migrating-progress').val(res.count/res.total_count*100);
-        $('#percentage').text(`${parseInt(res.count/res.total_count*100)}%`);
-        if (res.count == res.total_count) {
-            pagination(res);
-            showMigrationPage(res.mig_products);
+        if (res.mig_products && res.mig_products.length == 0) {
+            $('#migration-body').html('<h5 style="line-height:1.5" class="my-0">There is no product to merge. <br> You can only merge products you previously imported into your store with our data feeds instead of the app.</h5>');
             setTimeout(() => {
                 $('#migrate-products-modal').removeClass('show');
+                $('.bodyFront').removeClass('modal-open');
+                $('.bodyFront').css('padding-right', 0);
+            }, 4000);
+            setTimeout(() => {
                 $('#migrate-products-modal').css('display', 'none');
                 $('.modal-backdrop.fade.show').remove();
-            }, 1000);
+            }, 4150);
         } else {
-            bringProducts(params);
+            var params = {
+                action: 'migration',
+                index: res.index,
+                location_id: res.location_id,
+                Total_count: res.Total_count,
+                count: res.count,
+            }
+            $('#migrating-progress').val(res.count/res.Total_count*100);
+            $('#percentage').text(`${parseInt(res.count/res.Total_count*100)}%`);
+            $('#percentage').addClass('text-center h5');
+            if (res.count == res.Total_count) {
+                $('#pagination').show();
+                pagination(res);
+                showMigrateProducts(res.mig_products);
+                setTimeout(() => {
+                    $('#migrate-products-modal').removeClass('show');
+                    $('.bodyFront').removeClass('modal-open');
+                    $('.bodyFront').css('padding-right', 0);
+                }, 1000);
+                setTimeout(() => {
+                    $('#migrate-products-modal').css('display', 'none');
+                    $('.modal-backdrop.fade.show').remove();
+                }, 1150);
+            } else {
+                bringProducts(params);
+            }
         }
     })
-}
-
-function showMigrationPage (data) {
-    $('.migration').remove();
-    var str = `<div style="display: flex;">
-                <input type="checkbox" id="check-all-mp" value="" data-mark="false">
-                <div id="migrate-actions">
-                    <button class="btn-delete-products alldeletebutton redbutton mx-1">Delete</button>
-                    <button class="btn-confirm-products allconfirmbutton greenbutton mx-1">Confirm</button>
-                    <button class="btn-set-profit profit greenbutton mx-1" data-toggle="modal" data-target="#confirm-modal">Set Profit</button>
-                    <button class="btn-setting-profit profit greenbutton mx-1" style="display: none;">Setting...</button>
-                </div>
-            </div>
-            <div class="pagesize">
-                <span>Show</span>
-                <select name="PageSize" id="page_size" class="page_size">
-                    <option value="10">10</option>
-                    <option value="20">20</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                </select>
-            </div>
-            <table class="greentable" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th>
-                        </th>
-                        <th>
-                            Image
-                        </th>
-                        <th>
-                            Product Name
-                        </th>
-                        <th>
-                            Cost
-                        </th>
-                        <th>
-                            Profit
-                        </th>
-                        <th>
-                            Price
-                        </th>
-                        <th>
-                            SKU
-                        </th>
-                        <th>
-
-                        </th>
-                    </tr>
-                </thead>
-                <tbody id="product_data">`;
-    str += migrateProducts(data);
-    str += `</tbody></table>`;
-    $('.migrate-products').html(str);
 }
 
 function showMigrateProducts (data) {
     $('.productdatarow').remove();
     var str = migrateProducts(data);
-    $('#product_data').html(str);
+    if (data.length) {
+        $('.btn-migration').hide();
+        $('#product-top-menu').show();
+        $('#migration-top-text p').text('You can edit the profit margins for these products and update the price in your Shopify store.');
+        $('#migration-table').show();
+        $('#product_data').html(str);
+        Tipped.create('.simple-tooltip');
+        setTimeout(() => {
+            window.scrollTo(0,0);
+        }, 500);
+    } else {
+        $('#migration-top-text p').text('If you previously imported products using our data feeds, you can merge those products into the GreenDropShip App here.');
+        $('#product-top-menu').hide();
+        $('#migration-top-tet').hide();
+        $('#migration-table').hide();
+        $('.btn-migration').show();
+    }
+    $('#migration-top-text').show();
 }
 
 function migrateProducts (products) {
     var str = '';
     products.forEach(product => {
         var payload = JSON.parse(product.payload);
-        var button_str = '', profit_str = '';
-        var cost_str = '';
+        var button_str = '', profit_str = '', price_str = '';
         if (product.type == 'migration'){
-            button_str = `<button class="btn-confirm-product greenbutton mx-0" data-id="${product.id_shopify}" id="confirm-${product.id_shopify}">Confirm</button>
-                            <button class="greenbutton mx-0" data-id="${product.id_shopify}" id="confirming-${product.id_shopify}" style="display: none;">Confirming...</button>
-                            <button class="greenbutton mx-0" data-id="${product.id_shopify}" id="confirmed-${product.id_shopify}" style="display: none;">Confirmed</button>
-                            <button class="btn-mp-delete deletebutton redbutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Delete</button>
-                            <button class="deletebutton redbutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
-                            <button class="deletebutton redbutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
+            button_str = `<button class="btn-confirm-product greenbutton mx-0" data-toggle="modal" data-target="#confirm-modal" data-id="${product.id_shopify}" id="confirm-${product.id_shopify}">Update price</button>
+                <button class="greenbutton mx-0" id="confirmed-${product.id_shopify}" style="display: none;">Updated</button>
+                <button class="btn-mp-delete redbutton" data-toggle="modal" data-target="#confirm-modal" id="delete-${product.id_shopify}" data-id="${product.id_shopify}" style="display: none;">Delete</button>
+                <img src="/img/loading_1.gif" id="loading-${product.id_shopify}" style="display:none; height: 50px;">`;
             profit_str = `<div id="profit">
-                <input type="text" class="box-profit text-center border" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" data-sku="${product.sku}" value="${parseFloat((product.price - product.cost) / product.cost * 100).toFixed(2)}">
+                <input type="number" min="0" class="box-profit text-center border" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" data-sku="${product.sku}" value="${product.cost ? Math.round((product.price - product.cost) / product.cost * 100) : ''}">
                 %</div>`;
-            cost_str = `<span id="cost-${product.id_shopify}" class="nowrap">US$ ${parseFloat(product.cost).toFixed(2)}</span>`;
+            price_str = `<div id="price" class="nowrap">
+                US $<input type="number" min="0" class="box-price text-left border" id="price-${product.id_shopify}" data-id="${product.id_shopify}" data-sku="${product.sku}" value="${parseFloat(product.price).toFixed(2)}">
+                </div>`;
         } else {
-            button_str = `<button class="btn-mp-delete deletebutton redbutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}">Delete</button>
-                            <button class="deletebutton redbutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
-                            <button class="deletebutton redbutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
+            button_str = `<button class="btn-mp-delete redbutton" data-toggle="modal" data-target="#confirm-modal" id="delete-${product.id_shopify}" data-id="${product.id_shopify}">Delete</button>
+                <img src="/img/loading_1.gif" id="loading-${product.id_shopify}" style="display:none; height: 50px;">`;
+            profit_str = `<div id="profit">
+                <span>${product.cost ? Math.round((product.price - product.cost) / product.cost * 100) : ''}</span>
+                %</div>`;
+            price_str = `<span id="price-${product.id_shopify}" class="nowrap">US $${parseFloat(product.price).toFixed(2)}</span>`;
         }
 
         str += `<tr class="productdatarow">
@@ -1007,17 +1010,17 @@ function migrateProducts (products) {
                     <img src="${payload.image_url}">
                 </div>
             </td>
-            <td data-label="PRODUCT NAME">
-                ${ payload.name }
+            <td data-label="PRODUCT NAME" class="product-name text-left">
+                <span>${ payload.name }</span>
             </td>
             <td data-label="COST GDS">
-                ${cost_str}
+                <span id="cost-${product.id_shopify}" class="nowrap">US $${product.cost ? parseFloat(product.cost).toFixed(2) : ''}</span>
             </td>
             <td data-label="PROFIT">
                 ${profit_str}
             </td>
             <td data-label="RETAIL PRICE">
-                <span id="price-${product.id_shopify}" class="nowrap">US$ ${parseFloat(product.price).toFixed(2)}</span>
+                ${price_str}
             </td>
             <td data-label="SKU">
                 ${product.sku}
@@ -1415,6 +1418,39 @@ function uncheckAllProducts () {
     $('#select-all').show();
     $('#selected-products').text(0);
     $('#selected-products').hide();
+}
+
+function showBulkActionButtons () {
+    let count = 0;
+    $("input.checkbox:checked").each(function(index, ele) {
+        count++;
+    });
+    $('#selected-products').text(count);
+    if ($('#selected-products').text() <= 0) {
+        $('#check-all-products').prop('checked', false);
+        $('#select-all').css('display', 'block');
+        $('#selected-products').css('display', 'none');
+    } else {
+        if (!$('#check-all-products').is(':disabled')) {
+            $('#check-all-products').prop('checked', true);
+            if ($('#selected-products').text() < 10) {
+                $('#selected-products').css('padding', '0px 10px');
+            } else {
+                $('#selected-products').css('padding', '0px 5px');
+            }
+            $('#select-all').css('display', 'none');
+            $('#selected-products').css('display', 'block');
+        }
+    }
+}
+
+function popupFailMsg(msg) {
+    $('body').append('<div id="fade-background"></div>');
+    $('#product-fail-text').html(msg);
+    $('#product-fail').css('display', 'block');
+    setTimeout(() => {
+        $('#product-fail').addClass('show');
+    }, 150);
 }
 
 function setLoading() {

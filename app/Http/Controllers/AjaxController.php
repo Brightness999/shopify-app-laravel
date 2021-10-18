@@ -287,9 +287,14 @@ class AjaxController extends Controller
 
         if ($parameters['action'] == 'migration-count') {
             $count = ShopifyAdminApi::countProducts(Auth::user());
+            if (isset($count['body']['errors'])) {
+                return json_encode([
+                    'error' => 'A problem has occured while bringing the products from your store.<br>Please log into this app again through Shopify. <br> <a href="https://greendropship.com/contact-us/" target="_blank">Contact our support team</a> if you have any questions.'
+                ]);
+            }
             return json_encode([
                 'action' => 'migration',
-                'total_count' => $count['body']['count'],
+                'Total_count' => $count['body']['count'],
                 'index' => 0,
                 'location_id' => 0,
                 'count' => 0
@@ -298,12 +303,26 @@ class AjaxController extends Controller
 
         if ($parameters['action'] == 'migration') {
             $rows = [];
-            $products = ShopifyAdminApi::getProducts(Auth::User(), $parameters['index']);
-            if ($parameters['index'] == 0 && count($products['body']['products'])) {
-                $location_id = ShopifyAdminApi::getItemLocationId(Auth::User(), $products['body']['products'][0]['variants'][0]['inventory_item_id']);
-                $parameters['location_id'] = $location_id['body']['inventory_levels'][0]['location_id'];
+            $products = (object) [];
+            if ($parameters['location_id'] == 0) {
+                $res = self::getLocationId($parameters['index']);
+                if ($res) {
+                    $products = $res['products'];
+                    $parameters['location_id'] = $res['location_id'];
+                    $parameters['index'] = $res['index'];
+               } else {
+                    return json_encode([
+                        'mig_products' => [],
+                        'total_count' => 0,
+                        'count' => $parameters['count'],
+                        'page_number' => 1,
+                        'page_size' => 10
+                    ]);
+                }
+            } else {
+                $products = ShopifyAdminApi::getProducts(Auth::User(), $parameters['index']);
+                $parameters['index'] = $products['body']['products'][count($products['body']['products']) - 1]['id'];
             }
-            $parameters['index'] = $products['body']['products'][count($products['body']['products']) - 1]['id'];
             foreach ($products['body']['products'] as $product) {
                 if (substr($product['variants'][0]['sku'], 0, 2) == 'KH') {
                     $rows[] = [
@@ -312,19 +331,19 @@ class AjaxController extends Controller
                         'id_shopify' => $product['id'],
                         'id_variant_shopify' => $product['variants'][0]['id'],
                         'inventory_item_id_shopify' => $product['variants'][0]['inventory_item_id'],
-                        'location_id_shopify' => $parameters['location_id'],
-                        'user_id' => Auth::User()->id,
+                        'location_id_shopify' => $parameters->location_id,
+                        'user_id' => Auth::user()->id,
                         'payload' => json_encode([
                             'name' => $product['title'],
-                            'image_url' => $product['image'] != null ? $product['image']['src'] : ''
+                            'image_url' => $product['image'] != null ? $product['image']['src'] : '/img/default_image_75.png'
                         ]),
-                        'type' => Products::where('sku', $product['variants'][0]['sku'])->first() == null ? 'delete' : 'migration'
+                        'type' => 'migration'
                     ];
                 }
             }
             DB::table('temp_migrate_products')->insert($rows);
             $parameters['count'] = $parameters['count'] + count($products['body']['products']);
-            if ($parameters['count'] == $parameters['total_count']) {
+            if ($parameters['count'] * 1 == $parameters['Total_count'] * 1) {
                 $mig_products = DB::table('temp_migrate_products')
                     ->select('temp_migrate_products.*', 'products.price as cost')
                     ->leftJoin('products', 'temp_migrate_products.sku', '=', 'products.sku')
@@ -334,6 +353,7 @@ class AjaxController extends Controller
                 return json_encode([
                     'mig_products' => $mig_products,
                     'total_count' => $total_count,
+                    'Total_count' => $parameters['Total_count'],
                     'count' => $parameters['count'],
                     'page_number' => 1,
                     'page_size' => 10
@@ -343,7 +363,7 @@ class AjaxController extends Controller
                     'action' => 'migration',
                     'index' => $parameters['index'],
                     'location_id' => $parameters['location_id'],
-                    'total_count' => $parameters['total_count'],
+                    'Total_count' => $parameters['Total_count'],
                     'count' => $parameters['count'],
                 ]);
             }
@@ -353,11 +373,16 @@ class AjaxController extends Controller
             $page_number = $parameters['page_number'];
             $page_size = $parameters['page_size'];
             $mig_products = DB::table('temp_migrate_products')
-                ->select('temp_migrate_products.*', 'products.price as cost')
-                ->leftJoin('products', 'temp_migrate_products.sku', '=', 'products.sku')
                 ->where('user_id', Auth::user()->id)->orderByDesc('id_shopify');
             $total_count = $mig_products->count();
-            $mig_products = $mig_products->skip(($page_number - 1) * $page_size)->take($page_size)->get();
+            if (ceil($total_count / $page_size) < $page_number) {
+                $page_number = ceil($total_count / $page_size);
+            }
+            $mig_product_skus = $mig_products->skip(($page_number - 1) * $page_size)->take($page_size)->pluck('sku');
+            $mig_products = DB::table('temp_migrate_products')
+                ->select('temp_migrate_products.*', 'products.price as cost')
+                ->leftJoin('products', 'temp_migrate_products.sku', '=', 'products.sku')
+                ->where('user_id', Auth::user()->id)->whereIn('temp_migrate_products.sku', $mig_product_skus)->get();
             return json_encode([
                 'mig_products' => $mig_products,
                 'page_size' => $page_size,
@@ -369,14 +394,18 @@ class AjaxController extends Controller
         if ($parameters['action'] == 'set-default-profit') {
             $mig_skus = DB::table('temp_migrate_products')
                 ->where('user_id', Auth::User()->id)
+                ->whereIn('id_shopify', json_decode($parameters['shopify_ids']))
                 ->where('type', 'migration')->pluck('sku');
+            $setting = Settings::where('id_merchant', Auth::user()->id)->first();
+            if ($setting == null) {
+                $setting->set8 = 0;
+            }
             foreach ($mig_skus as $sku) {
                 $cost = DB::table('products')->where('sku', $sku)->pluck('price')->first();
-                $profit = Settings::where('id_merchant', Auth::user()->id)->first()->set8;
                 DB::table('temp_migrate_products')
                     ->where('user_id', Auth::User()->id)
                     ->where('sku', $sku)
-                    ->update(['price' => $cost * (100 + $profit) / 100]);
+                    ->update(['price' => $cost * (100 + $setting->set8) / 100]);
             }
             return json_encode(['result' => true]);
         }
@@ -676,5 +705,30 @@ class AjaxController extends Controller
         $settings->sync_price = $request->sync_price == 'true' ? 1 : 0;
         $settings->save();
         return response()->json(['res' => 'ok']);
+    }
+
+    public static function getLocationId($index)
+    {
+        $products = ShopifyAdminApi::getProducts(Auth::User(), $index);
+        $flag = true;
+        foreach ($products['body']['products'] as $product) {
+            if ($product['variants'][0]['fulfillment_service'] == 'greendropship') {
+                $location_id = ShopifyAdminApi::getItemLocationId(Auth::User(), $product['variants'][0]['inventory_item_id']);
+                $flag = false;
+                return [
+                    'location_id' => $location_id['body']['inventory_levels'][0]['location_id'],
+                    'products' => $products,
+                    'index' => $products['body']['products'][count($products['body']['products']) - 1]['id']
+                ];
+            }
+        }
+        if ($flag) {
+            if (count($products['body']['products']) == 0) {
+                return false;
+            } else {
+                $index = $products['body']['products'][count($products['body']['products']) - 1]['id'];
+                self::getLocationId($index);
+            }
+        }
     }
 }

@@ -1,12 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="indexContent" data-page_name="MIGRATION">
-
+<div class="indexContent" data-page_name="MERGE INVENTORY">
     <div class="maincontent">
-
         <div class="wrapinsidecontent">
-
+            <div class="alertan level2 alert-publish-single fail" style="display: none;">
+                <div class="agrid">
+                    <span class="text-danger">Deleting your product from Shopify store was failed.</span>
+                </div>
+            </div>
             @if(Auth::user()->plan == 'free')
             <div class="alertan">
                 <div class="agrid">
@@ -16,28 +18,30 @@
             </div>
             @endif
 
-            <div class="alertan level2">
+            <div class="alertan level2" id="migration-top-text" style="display: none;">
                 <div class="agrid">
-                    <p>You can view here all the products to migrate from your Shopify store.</p>
+                    <p></p>
                 </div>
                 <i class="fa fa-close text-secondary" aria-hidden="true"></i>
             </div>
             <div class="migrate-products" style="display: block;">
-                @if($total_count == 0)
-                <button class="btn-migration migration greenbutton" data-toggle="modal" data-target="#migrate-products-modal">Migrate</button>
-                @else
-                <div class="product-menu" id="product-top-menu">
-                    <div style="display: flex; align-items: center;">
-                        <input type="checkbox" id="check-all-mp" value="" data-mark="false">
-                        <div id="migrate-actions">
+                <button class="btn-migration migration greenbutton" style="display: none;">Merge</button>
+                <div class="product-menu migration-menu" id="product-top-menu" style="display: none;">
+                    <div class="sendtoshopify">
+                        <div class="checksend">
+                            <input type="checkbox" id="check-all-products" value="" data-mark="false">
+                            <span id="select-all" class="h4 mx-2 my-0 font-weight-bold">Select All</span>
+                            <span id="selected-products">0</span>
+                        </div>
+                        <div class="btn-import-actions">
                             <button class="btn-delete-products alldeletebutton redbutton mx-1">Delete</button>
-                            <button class="btn-confirm-products allconfirmbutton greenbutton mx-1">Confirm</button>
-                            <button class="btn-set-profit profit greenbutton mx-1" data-toggle="modal" data-target="#confirm-modal">Set Profit</button>
-                            <button class="btn-setting-profit profit greenbutton mx-1" style="display: none;">Setting...</button>
+                            <button class="btn-confirm-products allconfirmbutton greenbutton mx-1">Update all pricing</button>
+                            <button class="simple-tooltip btn-set-profit profit greenbutton mx-1" title="This would set the profit margin to the default profit margin under Settings or to the profit margin you have updated on this page.">Update profit margin</button>
+                            <button class="btn-setting-profit profit greenbutton mx-1" style="display: none;">Updating...</button>
                         </div>
                     </div>
                     <div class="pagesize">
-                        <span>Show</span>
+                        <span class="h5 my-0">Show</span>
                         <select name="PageSize" id="page_size">
                             <option value="10">10</option>
                             <option value="20">20</option>
@@ -46,120 +50,74 @@
                         </select>
                     </div>
                 </div>
-                <table class="greentable" cellspacing="0">
+                <table class="greentable" id="migration-table" cellspacing="0" style="display: none;">
                     <thead>
                         <tr>
-                            <th>
-                            </th>
-                            <th>
-                                Image
-                            </th>
-                            <th>
-                                Product Name
-                            </th>
-                            <th>
-                                Cost
-                            </th>
-                            <th>
-                                Profit
-                            </th>
-                            <th>
-                                Price
-                            </th>
-                            <th>
-                                SKU
-                            </th>
-                            <th>
-
-                            </th>
+                            <th></th>
+                            <th>Image</th>
+                            <th>Product Name</th>
+                            <th>Cost</th>
+                            <th>Profit</th>
+                            <th>Price</th>
+                            <th>SKU</th>
+                            <th></th>
                         </tr>
                     </thead>
-                    <tbody id="product_data">
-                        @foreach ($mig_products as $product)
-                        <tr class="productdatarow">
-                            <td class="check">
-                                <input type="checkbox" id="check-{{$product->id_shopify}}" data-id="{{$product->id_shopify}}" value="" class="checkbox">
-                            </td>
-                            <td class="pimage">
-                                <div class="productphoto">
-                                    <img src="{{json_decode($product->payload)->image_url}}">
-                                </div>
-                            </td>
-                            <td data-label="PRODUCT NAME">
-                                {{json_decode($product->payload)->name}}
-                            </td>
-                            <td data-label="COST GDS">
-                                @if($product->type == 'migration')
-                                <span id="cost-{{$product->id_shopify}}" class="nowrap">US$ {{number_format($product->cost,2,'.','')}}</span>
-                                @endif
-                            </td>
-                            <td data-label="PROFIT">
-                                @if($product->type == 'migration')
-                                <div id="profit">
-                                    <input type="text" class="box-profit text-center border" id="profit-{{$product->id_shopify}}" data-id="{{$product->id_shopify}}" data-sku="{{$product->sku}}" value="{{number_format(($product->price - $product->cost)/$product->cost*100, 2, '.', '')}}">
-                                %</div>
-                                @endif
-                            </td>
-                            <td data-label="RETAIL PRICE">
-                                <span id="price-{{$product->id_shopify}}" class="nowrap">US$ {{number_format($product->price,2,'.','')}}</span>
-                            </td>
-                            <td data-label="SKU">
-                                {{$product->sku}}
-                            </td>
-                            <td id="action">
-                                @if ($product->type == 'migration')
-                                <button class="btn-confirm-product greenbutton mx-0" data-id="{{$product->id_shopify}}" id="confirm-{{$product->id_shopify}}">Confirm</button>
-                                <button class="greenbutton mx-0" data-id="{{$product->id_shopify}}" id="confirming-{{$product->id_shopify}}" style="display: none;">Confirming...</button>
-                                <button class="greenbutton mx-0" data-id="{{$product->id_shopify}}" id="confirmed-{{$product->id_shopify}}" style="display: none;">Confirmed</button>
-                                <button class="btn-mp-delete deletebutton redbutton" id="delete-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Delete</button>
-                                <button class="deletebutton redbutton" id="deleting-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleting...</button>
-                                <button class="deletebutton redbutton" id="deleted-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleted</button>
-                                @else
-                                <button class="btn-mp-delete deletebutton redbutton" id="delete-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}">Delete</button>
-                                <button class="deletebutton redbutton" id="deleting-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleting...</button>
-                                <button class="deletebutton redbutton" id="deleted-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleted</button>
-                                @endif
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
+                    <tbody id="product_data"></tbody>
                 </table>
-                @endif
+            </div>
+            <div id="pagination" style="display: none;"></div>
+        </div>
+    </div>
+</div>
+<div class="back-to-top" style="display:none">
+    <img src=" {{ asset('/img/back_to_top.png') }}" alt="Back to Top">
+    <span style="text-align: center;" class="h5">Back<br>to Top</span>
+</div>
+
+<div id="migrate-products-modal" class="modal fade" role="dialog" data-backdrop="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="display:block">
+                <button type="button" class="close" id="merge-close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Merging Inventory</h4>
+            </div>
+            <div class="modal-body" id="migration-body" style="text-align:left;">
+                <progress id="migrating-progress" max="100" value="0" style="width:100%;">0%</progress>
+                <p id="percentage"></p>
             </div>
         </div>
     </div>
 </div>
 
-
-<!-- Modal -->
-<div id="migrate-products-modal" class="modal fade" role="dialog" data-backdrop="true">
-  <div class="modal-dialog modal-dialog-centered">
-
-    <!-- Modal content-->
-    <div class="modal-content">
-      <div class="modal-header" style="display:block">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Migrating</h4>
-      </div>
-      <div class="modal-body" style="text-align:center; font-size:20px;">
-      <progress id="migrating-progress" max="100" value="0" style="width:100%;"> 70% </progress>
-      <p id="percentage"></p>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<div id="pagination"></div>
 <input type="text" id="total_count" value="{{$total_count}}" hidden>
-<input type="text" id="csrf_token" value="{{csrf_token()}}" hidden>
-<input type="text" id="default_profit" value="{{$default_profit}}" hidden>
-
+<input type="text" id="modal-type" data-id="" value="" hidden>
 <script type="text/javascript">
     $(document).ready(function() {
-        $('#total_count').text("{{$total_count}}");
 
         $('#confirm').click(function() {
+            switch ($('#modal-type').val()) {
+                case 'set-profit':
+                    setProfit();
+                    break;
+                case 'confirm-product':
+                    confirmProduct();
+                    break;
+                case 'confirm-products':
+                    confirmProducts();
+                    break;
+                case 'delete-product':
+                    deleteProduct();
+                    break;
+                case 'delete-products':
+                    deleteProducts();
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        function setProfit() {
             $('.btn-set-profit').hide();
             $('.btn-delete-products').prop('disabled', true);
             $('.btn-confirm-products').prop('disabled', true);
@@ -167,13 +125,14 @@
             $('.btn-setting-profit').show();
             var parameters = {
                 action: 'set-default-profit',
+                shopify_ids: $('#modal-type').data('id')
             }
-            $.getJSON(ajax_link, parameters, function (res) {
-                $('.box-profit').each(function(index, ele) {
-                    $(ele).val($('#default_profit').val());
-                    var cost = $(`#cost-${$(ele).data('id')}`).text();
-                    var profit = $('#default_profit').val();
-                    $(`#price-${$(ele).data('id')}`).text(parseFloat(cost.substr(4) * (1 + profit / 100)).toFixed(2));
+            $.getJSON(ajax_link, parameters, function(res) {
+                JSON.parse($('#modal-type').data('id')).forEach(product_id => {
+                    $(`#profit-${product_id}`).val("{{$default_profit}}");
+                    var cost = $(`#cost-${product_id}`).text();
+                    var profit = "{{$default_profit}}";
+                    $(`#price-${product_id}`).val(`${parseFloat(cost.substr(4) * (1 + profit / 100)).toFixed(2)}`);
                 });
                 $('.btn-setting-profit').hide();
                 $('.btn-set-profit').show();
@@ -181,178 +140,76 @@
                 $('.btn-confirm-product').prop('disabled', false);
                 $('.btn-confirm-products').prop('disabled', false);
             })
-        });
-
-        var user_id = "{{Auth::user() ? Auth::user()->id : 0}}";
-        function deleteProductsAjax() {
-            let product_ids = [];
-            $("input[type='checkbox']").each(function(index, ele) {
-                if (ele.disabled && ele.checked) {
-                    product_ids.push($(ele).attr('id').split('-')[1]);
-                }
-            });
-            if (user_id && product_ids.length) {
-                $.ajax({
-                        type: 'POST',
-                        url: '/check-delete-migrate',
-                        data: {
-                            "_token": "{{ csrf_token() }}",
-                            product_ids: product_ids,
-                        },
-                    })
-                    .then(res => {
-                        $('.btn-delete-products').prop('disabled', false);
-                        $('.btn-confirm-products').prop('disabled', false);
-                        $('.btn-set-profit').prop('disabled', false);
-                        res.product_ids.forEach(id => {
-                            $(`#delete-${id}`).hide();
-                            $(`#deleting-${id}`).hide();
-                            $(`#confirmed-${id}`).hide();
-                            $(`#deleted-${id}`).show();
-                            $(`#check-${id}`).prop('checked', false);
-                        });
-                    });
-            }
         }
-        deleteProductsAjax();
-        setInterval(deleteProductsAjax, 15000);
-    });
 
-    $('.migrate-products').on('click', '.btn-mp-delete', function() {
-        $(`#check-${$(this).data('migproductid')}`).prop('disabled', true);
-        $(`#delete-${$(this).data('migproductid')}`).hide();
-        $(`#deleting-${$(this).data('migproductid')}`).show();
-        $(`#deleted-${$(this).data('migproductid')}`).hide();
-        $(`#check-${$(this).data('migproductid')}`).removeClass();
-        $(`#check-${$(this).data('migproductid')}`).prop('disabled', true);
-        $.post('{{url("/delete-migrate-product")}}', {
-            "_token": "{{ csrf_token() }}",
-            product_ids: [$(this).data('migproductid')]
-        }, function(data, status) {
-            if (data.result) {
-                $(`#delete-${data.product_id}`).hide();
-                $(`#deleting-${data.product_id}`).hide();
-                $(`#deleted-${data.product_id}`).show();
-                $(`#check-${data.product_id}`).prop('checked', false);
-            }
-        });
-    });
-    
-    $('.migrate-products').on('click', '#check-all-mp', function() {
-        if ($('#check-all-mp').is(':checked')) {
-            $('.checkbox').prop('checked', true);
-        } else {
-            $('.checkbox').prop('checked', false);
-        }
-    })
-    
-    $('.migrate-products').on('click', '.btn-delete-products', function() {
-        let product_ids = [];
-        $("input.checkbox:checked").each(function(index, ele) {
-            let product_id = $(ele).attr('id').split('-')[1];
-            if ($(`#delete-${product_id}`).is(":visible")) {
-                product_ids.push(product_id);
-            }
-        });
-        if (product_ids.length) {
-            $(this).attr('data-toggle', '');
-            $('.btn-delete-products').prop('disabled', true);
-            $('.btn-confirm-products').prop('disabled', true);
-            $('.btn-set-profit').prop('disabled', true);
-            product_ids.forEach(product_id => {
-                $(`#check-${product_id}`).prop('disabled', true);
-                $(`#delete-${product_id}`).hide();
-                $(`#deleting-${product_id}`).show();
-                $(`#deleted-${product_id}`).hide();
-                $(`#check-${product_id}`).removeClass();
-                $(`#check-${product_id}`).prop('disabled', true);
-            });
-            $.post('{{url("/delete-migrate-products")}}', {
+        function confirmProduct() {
+            let product_id = $('#modal-type').data('id');
+            $(`#check-${product_id}`).prop('disabled', true);
+            $(`#confirm-${product_id}`).hide();
+            $(`#loading-${product_id}`).show();
+            $(`#check-${product_id}`).removeClass();
+            $(`#check-${product_id}`).prop('disabled', true);
+            $.post('{{url("/confirm-migrate-products")}}', {
                 "_token": "{{ csrf_token() }}",
-                product_ids: product_ids,
-            }, function(data, status) {});
-        } else {
-            $(this).attr('data-toggle', 'modal');
-            $(this).attr('data-target', '#confirm-modal');
-            $('#confirm-modal-body').html('<h5>At least one checkbox must be selected</h5>');
-            $('#confirm-modal-footer').hide();
-        }
-    });
-    
-    $('.migrate-products').on('click', '.btn-set-profit', function() {
-        $('#confirm-modal-body').html(`<h5>Are you sure to set all profits to {{$default_profit}}%?</h5>`);
-        $('#confirm-modal-footer').show();
-    });
-
-    $('.migrate-products').on('click', '.btn-confirm-product', function() {
-        $(`#check-${$(this).data('id')}`).prop('disabled', true);
-        $(`#confirm-${$(this).data('id')}`).hide();
-        $(`#confirming-${$(this).data('id')}`).show();
-        $(`#confirmed-${$(this).data('id')}`).hide();
-        $(`#check-${$(this).data('id')}`).removeClass();
-        $(`#check-${$(this).data('id')}`).prop('disabled', true);
-        $.post('{{url("/confirm-migrate-products")}}', {
-            "_token": "{{ csrf_token() }}",
-            products: [{
-                id: $(this).data('id'),
-                profit: $(`#profit-${$(this).data('id')}`).val()
-            }]
-        }, function(data, status) {
-            data.products.forEach(product => {
-                $(`#confirm-${product.id}`).hide();
-                $(`#confirming-${product.id}`).hide();
-                $(`#check-${product.id}`).prop('checked', false);
-                $(`#profit-${product.id}`).prop('disabled', true);
-                $(`#profit-${product.id}`).css({'border': 'none', 'background': 'transparent'});
-                if (product.result) {
-                    $(`#confirmed-${product.id}`).show();
-                    $(`#check-${product.id}`).prop('checked', false);
-                } else {
-                    $(`#delete-${product.id}`).show();
-                    $(`#confirmed-${product.id}`).hide();
-                    $(`#check-${product.id}`).prop('disabled', false);
-                    $(`#check-${product.id}`).addClass('checkbox');
-                }
-            });
-        });
-    });
-    
-    $('.migrate-products').on('click', '.btn-confirm-products', function() {
-        let products = [];
-        $("input.checkbox:checked").each(function(index, ele) {
-            let product_id = $(ele).attr('id').split('-')[1];
-            let profit = $(`#profit-${$(this).data('id')}`).val();
-            if ($(`#confirm-${product_id}`).is(":visible")) {
-                products.push({
+                products: JSON.stringify([{
                     id: product_id,
-                    profit: profit
+                    profit: $(`#profit-${product_id}`).val()
+                }])
+            }, function(data, status) {
+                data.products.forEach(product => {
+                    $(`#confirm-${product.id}`).hide();
+                    $(`#loading-${product.id}`).hide();
+                    $(`#check-${product.id}`).prop('checked', false);
+                    $(`#profit-${product.id}`).replaceWith(`<span>${$(`#profit-${product.id}`).val()}</span>`);
+                    $(`#price-${product.id}`).replaceWith(`<span>${$(`#price-${product.id}`).val()}</span>`);
+                    if (product.result) {
+                        $('#check-all-products').prop('disabled', false);
+                        $('.btn-confirm-products').prop('disabled', false);
+                        $('.btn-delete-products').prop('disabled', false);
+                        $('.btn-set-profit').prop('disabled', false);
+                        $(`#confirmed-${product.id}`).show();
+                        $(`#check-${product.id}`).prop('checked', false);
+                    } else {
+                        $(`#delete-${product.id}`).show();
+                        $(`#check-${product.id}`).prop('disabled', false);
+                        $(`#check-${product.id}`).addClass('checkbox');
+                        if ($('#selected-products').text() > 0) {
+                            $('#selected-products').text($('#selected-products').text() - 1);
+                        }
+                    }
+                    showBulkActionButtons();
                 });
-            }
-        });
-        if (products.length > 0) {
-            $(this).prop('disabled', true);
+            });
+        }
+
+        function confirmProducts() {
+            let products = JSON.parse($('#modal-type').data('id'));
+            $('.btn-confirm-products').prop('disabled', true);
+            $('#check-all-products').prop('disabled', true);
+            $('#check-all-products').prop('checked', false);
             $('.btn-delete-products').prop('disabled', true);
             $('.btn-set-profit').prop('disabled', true);
             products.forEach(product => {
                 $(`#check-${product.id}`).prop('disabled', true);
                 $(`#confirm-${product.id}`).hide();
-                $(`#confirming-${product.id}`).show();
+                $(`#loading-${product.id}`).show();
                 $(`#check-${product.id}`).removeClass();
                 $(`#check-${product.id}`).prop('disabled', true);
             });
             $.post('{{url("/confirm-migrate-products")}}', {
                 "_token": "{{ csrf_token() }}",
-                products: products,
+                products: JSON.stringify(products),
             }, function(data, status) {
+                $('#check-all-products').prop('disabled', false);
                 $('.btn-confirm-products').prop('disabled', false);
                 $('.btn-delete-products').prop('disabled', false);
                 $('.btn-set-profit').prop('disabled', false);
                 data.products.forEach(product => {
                     $(`#confirm-${product.id}`).hide();
-                    $(`#confirming-${product.id}`).hide();
+                    $(`#loading-${product.id}`).hide();
                     $(`#check-${product.id}`).prop('checked', false);
-                    $(`#profit-${product.id}`).prop('disabled', true);
-                    $(`#profit-${product.id}`).css({'border': 'none', 'background': 'transparent'});
+                    $(`#profit-${product.id}`).replaceWith(`<span>${$(`#profit-${product.id}`).val()}</span>`);
+                    $(`#price-${product.id}`).replaceWith(`<span>${$(`#price-${product.id}`).val()}</span>`);
                     if (product.result) {
                         $(`#confirmed-${product.id}`).show();
                         $(`#check-${product.id}`).prop('checked', false);
@@ -363,121 +220,319 @@
                         $(`#check-${product.id}`).addClass('checkbox');
                     }
                 });
+                uncheckAllProducts();
             });
+        }
+
+        function deleteProduct() {
+            let product_id = $('#modal-type').data('id');
+            $(`#check-${product_id}`).prop('disabled', true);
+            $(`#check-${product_id}`).prop('checked', false);
+            $(`#delete-${product_id}`).hide();
+            $(`#loading-${product_id}`).show();
+            $(`#check-${product_id}`).removeClass();
+            $.post('{{url("/delete-migrate-product")}}', {
+                "_token": "{{ csrf_token() }}",
+                product_id: [product_id]
+            }, function(data, status) {
+                if (data.result) {
+                    uncheckAllProducts();
+                    let parameters = {
+                        action: getAction(),
+                        page_size: $('#page_size').val(),
+                        page_number: $('.page_number.selected').text()
+                    }
+                    getData(parameters);
+                }
+            }).fail(function() {
+                uncheckAllProducts();
+                $(`#check-${product_id}`).prop('disabled', false);
+                $(`#loading-${product_id}`).hide();
+                $(`#delete-${product_id}`).show();
+                $(`#check-${product_id}`).addClass('checkbox');
+                popupFailMsg('A problem has occured while deleting your product.')
+            });
+        }
+
+        function deleteProducts() {
+            let product_ids = JSON.parse($('#modal-type').data('id'));
+            $('#check-all-products').prop('disabled', true);
+            $('#check-all-products').prop('checked', false);
+            $('.btn-delete-products').prop('disabled', true);
+            $('.btn-confirm-products').prop('disabled', true);
+            $('.btn-set-profit').prop('disabled', true);
+            product_ids.forEach(product_id => {
+                $(`#check-${product_id}`).prop('disabled', true);
+                $(`#check-${product_id}`).prop('checked', false);
+                $(`#delete-${product_id}`).hide();
+                $(`#loading-${product_id}`).show();
+                $(`#check-${product_id}`).removeClass();
+            });
+            window.localStorage.removeItem('confirm_product_ids');
+            window.localStorage.setItem('confirm_product_ids', JSON.stringify(product_ids));
+            uncheckAllProducts();
+            $.post('{{url("/delete-migrate-products")}}', {
+                "_token": "{{ csrf_token() }}",
+                product_ids: JSON.stringify(product_ids),
+            }, function(data, status) {
+            }).fail(function() {
+                $('#check-all-products').prop('disabled', false);
+                $('.btn-delete-products').prop('disabled', false);
+                $('.btn-confirm-products').prop('disabled', false);
+                $('.btn-set-profit').prop('disabled', false);
+                product_ids.forEach(product_id => {
+                    $(`#check-${product_id}`).prop('disabled', false);
+                    $(`#check-${product_id}`).addClass('checkbox');
+                    $(`#loading-${product_id}`).hide();
+                    $(`#delete-${product_id}`).show();
+                });
+                popupFailMsg('A problem has occured while deleting your products.')
+            });
+        }
+
+        var user_id = "{{Auth::user() ? Auth::user()->id : 0}}";
+
+        function deleteProductsAjax() {
+            let product_ids = JSON.parse(window.localStorage.getItem('confirm_product_ids'));
+            if (product_ids) {
+                if (user_id && product_ids.length) {
+                    $.post('/check-delete-migrate', {
+                        "_token": "{{ csrf_token() }}",
+                        product_ids: product_ids,
+                    }).then(res => {
+                        window.localStorage.removeItem('confirm_product_ids');
+                        $('#check-all-products').prop('disabled', false);
+                        $('.btn-delete-products').prop('disabled', false);
+                        $('.btn-confirm-products').prop('disabled', false);
+                        $('.btn-set-profit').prop('disabled', false);
+                        let parameters = {
+                            action: getAction(),
+                            page_size: $('#page_size').val(),
+                            page_number: $('.page_number.selected').text()
+                        }
+                        getData(parameters);
+                    });
+                }
+            }
+        }
+        deleteProductsAjax();
+        setInterval(deleteProductsAjax, 15000);
+    });
+
+    $('.migrate-products').on('click', '.btn-mp-delete', function(e) {
+        $('#confirm-modal-title').text('Delete product');
+        $('#confirm-modal-body').html(`<h5>Deleting this product will delete it from your Shopify store.</h5>`);
+        $('#modal-type').val('delete-product');
+        $('#modal-type').data('id', e.target.dataset.id);
+        $('#confirm').text('Delete');
+        $('#confirm').removeClass('btn-success');
+        $('#confirm').addClass('btn-danger');
+        $('#confirm').css('background-color', '#F72525');
+        $('#cancel').show();
+    });
+
+    $('.migrate-products').on('click', '#check-all-products', function() {
+        if ($('#check-all-products').is(':checked')) {
+            $('.checkbox').prop('checked', true);
+            let count = 0;
+            $("input.checkbox:checked").each(function(index, ele) {
+                count++;
+            });
+            $('#selected-products').text(count);
         } else {
+            $('.checkbox').prop('checked', false);
+            $('#selected-products').text(0);
+        }
+        showBulkActionButtons();
+    })
+
+    $('.migrate-products').on('click', '.btn-delete-products', function() {
+        let product_ids = [];
+        let count_confirm_product = 0;
+        $("input.checkbox:checked").each(function(index, ele) {
+            let product_id = $(ele).attr('id').split('-')[1];
+            if ($(`#delete-${product_id}`).is(":visible")) {
+                product_ids.push(product_id);
+            } else {
+                count_confirm_product++;
+            }
+        });
+
+        if (count_confirm_product > 0) {
             $(this).attr('data-toggle', 'modal');
             $(this).attr('data-target', '#confirm-modal');
-            $('#confirm-modal-body').html('<h5>At least one checkbox must be selected</h5>');
-            $('#confirm-modal-footer').hide();
+            $('#confirm-modal-title').text('Confirm');
+            $('#confirm-modal-body').html('<h5>Please select only the products to delete.</h5>');
+            $('#modal-type').val('product');
+            $('#confirm').text('Confirm');
+            $('#confirm').removeClass('btn-danger');
+            $('#confirm').addClass('btn-success');
+            $('#confirm').css('background-color', '#44b955');
+            $('#cancel').hide();
+        } else {
+            if (product_ids.length == 0) {
+                $(this).removeAttr('data-toggle');
+                $(this).removeAttr('data-target');
+            } else {
+                $(this).attr('data-toggle', 'modal');
+                $(this).attr('data-target', '#confirm-modal');
+                $('#confirm-modal-title').text('Delete product');
+                $('#confirm-modal-body').html(`<h5>${product_ids.length == 1 ? 'Deleting this product will delete it from your Shopify store.' : 'Deleting '+ product_ids.length +' products will delete them from your Shopify store.'}</h5>`);
+                $('#modal-type').val('delete-products');
+                $('#modal-type').data('id', JSON.stringify(product_ids));
+                $('#confirm').text('Delete');
+                $('#confirm').removeClass('btn-success');
+                $('#confirm').addClass('btn-danger');
+                $('#confirm').css('background-color', '#F72525');
+                $('#cancel').show();
+            }
         }
     });
-    
-    $('.migrate-products').on('change', '.page_size', function (event) {
-        var parameters = {
-            action: 'migrate-products',
-            page_size: event.target.value,
-            page_number: 1
-        }
-        $.getJSON(ajax_link, parameters, function (res) {
-            pagination(res);
-            showMigrateProducts(res.mig_products);
-        })
-        function pagination (data) {
-            if (data.page_number == '1') {
-                $('#prev').prop('disabled', true);
-            } else {
-                $('#prev').prop('disabled', false);
-            }
-            if (data.page_number * data.page_size >= data.total_count) {
-                $('#next').prop('disabled', true);
-            } else {
-                $('#next').prop('disabled', false);
-            }
-            $('#total_count').text(data.total_count);
-            if (Math.ceil(data.total_count / data.page_size) == 0) {
-                $('#total_page').text(0);
-                $('#page_number').text(0);
-            } else {
-                $('#total_page').text(Math.ceil(data.total_count / data.page_size));
-                $('#page_number').text(data.page_number);
-            }
-        }
-        function showMigrateProducts (data) {
-            $('.productdatarow').remove();
-            var str = migrateProducts(data);
-            $('#product_data').html(str);
-        }
-        function migrateProducts (products) {
-            var str = '';
-            products.forEach(product => {
-                var payload = JSON.parse(product.payload);
-                var button_str = '', profit_str = '';
-                var cost_str = '';
-                if (product.type == 'migration'){
-                    button_str = `<button class="btn-confirm-product greenbutton mx-0" data-id="${product.id_shopify}" id="confirm-${product.id_shopify}">Confirm</button>
-                                    <button class="greenbutton mx-0" data-id="${product.id_shopify}" id="confirming-${product.id_shopify}" style="display: none;">Confirming...</button>
-                                    <button class="greenbutton mx-0" data-id="${product.id_shopify}" id="confirmed-${product.id_shopify}" style="display: none;">Confirmed</button>
-                                    <button class="btn-mp-delete deletebutton redbutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Delete</button>
-                                    <button class="deletebutton redbutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
-                                    <button class="deletebutton redbutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
-                    profit_str = `<div id="profit">
-                        <input type="text" class="box-profit text-center border" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" data-sku="${product.sku}" value="${parseFloat((product.price - product.cost) / product.cost * 100).toFixed(2)}">
-                        %</div>`;
-                    cost_str = `<span id="cost-${product.id_shopify}" class="nowrap">US$ ${parseFloat(product.cost).toFixed(2)}</span>`;
-                } else {
-                    button_str = `<button class="btn-mp-delete deletebutton redbutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}">Delete</button>
-                                    <button class="deletebutton redbutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
-                                    <button class="deletebutton redbutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
-                }
 
-                str += `<tr class="productdatarow">
-                    <td class="check">
-                        <input type="checkbox" id="check-${ product.id_shopify }" data-id="${ product.id_shopify }" value="" class="checkbox">
-                    </td>
-                    <td class="pimage">
-                        <div class="productphoto">
-                            <img src="${payload.image_url}">
-                        </div>
-                    </td>
-                    <td data-label="PRODUCT NAME">
-                        ${ payload.name }
-                    </td>
-                    <td data-label="COST GDS">
-                        ${cost_str}
-                    </td>
-                    <td data-label="PROFIT">
-                        ${profit_str}
-                    </td>
-                    <td data-label="RETAIL PRICE">
-                        <span id="price-${product.id_shopify}" class="nowrap">US$ ${parseFloat(product.price).toFixed(2)}</span>
-                    </td>
-                    <td data-label="SKU">
-                        ${product.sku}
-                    </td>
-                    <td id="action">
-                        ${button_str}
-                    </td>
-                </tr>`;
-            });
-            return str;
+    $('.migrate-products').on('click', '.btn-set-profit', function() {
+        let count_delete_product = 0;
+        let count_confirm_product = 0;
+        let confirm_product_ids = [];
+        $("input.checkbox:checked").each(function(index, ele) {
+            if ($(`#confirm-${ele.dataset.id}`).is(':visible')) {
+                count_confirm_product++;
+                confirm_product_ids.push(ele.dataset.id);
+            } else {
+                count_delete_product++;
+            }
+        });
+        if (count_delete_product > 0) {
+            $(this).attr('data-toggle', 'modal');
+            $(this).attr('data-target', '#confirm-modal');
+            $('#confirm-modal-title').text('Confirm');
+            $('#confirm-modal-body').html(`<h5>Please select only the products to update.</h5>`);
+            $('#modal-type').val('product');
+            $('#confirm').removeClass('btn-danger');
+            $('#confirm').addClass('btn-success');
+            $('#confirm').css('background-color', '#44b955');
+            $('#cancel').hide();
+        } else {
+            if (count_confirm_product > 0) {
+                $(this).attr('data-toggle', 'modal');
+                $(this).attr('data-target', '#confirm-modal');
+                $('#confirm-modal-title').text('Update profit margin');
+                $('#confirm-modal-body').html(`<h5>Are you sure you want to update the margin of ${count_confirm_product} ${count_confirm_product > 1 ? 'products' : 'product'} to {{$default_profit}}%?</h5>`);
+                $('#modal-type').val('set-profit');
+                $('#modal-type').data('id', JSON.stringify(confirm_product_ids));
+                $('#confirm').text('Update');
+                $('#confirm').removeClass('btn-danger');
+                $('#confirm').addClass('btn-success');
+                $('#confirm').css('background-color', '#44b955');
+                $('#cancel').show();
+            } else {
+                $(this).removeAttr('data-toggle');
+                $(this).removeAttr('data-target');
+            }
         }
     });
-    
+
+    $('.migrate-products').on('click', '.btn-confirm-product', function(e) {
+        let profit = $(`#profit-${e.target.dataset.id}`).val();
+        $('#confirm-modal-title').text('Update price');
+        $('#confirm-modal-body').html(`<h5>Are you sure you want to update this product margin to ${profit}%?</h5>`);
+        $('#modal-type').val('confirm-product');
+        $('#modal-type').data('id', e.target.dataset.id);
+        $('#confirm').text('Update');
+        $('#confirm').removeClass('btn-danger');
+        $('#confirm').addClass('btn-success');
+        $('#confirm').css('background-color', '#44b955');
+        $('#cancel').show();
+    });
+
+    $('.migrate-products').on('click', '.btn-confirm-products', function() {
+        let products = [];
+        let count_delete_product = 0;
+        $("input.checkbox:checked").each(function(index, ele) {
+            let product_id = $(ele).attr('id').split('-')[1];
+            let profit = $(`#profit-${$(this).data('id')}`).val();
+            if ($(`#confirm-${product_id}`).is(":visible")) {
+                products.push({
+                    id: product_id,
+                    profit: profit
+                });
+            } else {
+                count_delete_product++;
+            }
+        });
+
+        if (count_delete_product > 0) {
+            $(this).attr('data-toggle', 'modal');
+            $(this).attr('data-target', '#confirm-modal');
+            $('#confirm-modal-title').text('Confirm');
+            $('#confirm-modal-body').html(`<h5>Please select only the products to update.</h5>`);
+            $('#modal-type').val('product');
+            $('#confirm').text('Confirm');
+            $('#confirm').removeClass('btn-danger');
+            $('#confirm').addClass('btn-success');
+            $('#confirm').css('background-color', '#44b955');
+            $('#cancel').hide();
+        } else {
+            if (products.length == 0) {
+                $(this).removeAttr('data-toggle');
+                $(this).removeAttr('data-target');
+            } else {
+                $(this).attr('data-toggle', 'modal');
+                $(this).attr('data-target', '#confirm-modal');
+                $('#confirm-modal-title').text('Update price');
+                $('#confirm-modal-body').html(`<h5>Are you sure you want to update the price of ${products.length} ${products.length == 1 ? 'product' : 'products'}?</h5>`);
+                $('#modal-type').val('confirm-products');
+                $('#modal-type').data('id', JSON.stringify(products));
+                $('#confirm').text('Update');
+                $('#confirm').removeClass('btn-danger');
+                $('#confirm').addClass('btn-success');
+                $('#confirm').css('background-color', '#44b955');
+                $('#cancel').show();
+            }
+        }
+    });
+
     $('.migrate-products').on('change', '.box-profit', function() {
         var id_product = $(this).data('id');
         var cost = $('#cost-' + id_product).text();
         var profit = $(this).val();
-        var value = cost.substr(4);
+        var price = cost.substr(4);
         if (profit > 0) {
-            value = parseFloat((cost.substr(4) * (100 + profit * 1)) / 100).toFixed(2);
+            price = parseFloat(cost.substr(4) * (100 + profit * 1) / 100).toFixed(2);
         }
         $.getJSON(ajax_link, {
             action: 'change-profit',
             sku: $(this).data('sku'),
             profit: profit
-        }, function (res) {
-            $('#price-' + id_product).text(`US$ ${value}`);
+        }, function(res) {
+            $('#price-' + id_product).val(price);
         })
+    });
+
+    $('.migrate-products').on('change', '.box-price', function() {
+        var id_product = $(this).data('id');
+        var cost = $('#cost-' + id_product).text();
+        var price = $(this).val();
+        var profit = $('#profit-' + id_product).val();
+        if (price > 0) {
+            profit = parseFloat(( price - cost.substr(4) ) / cost.substr(4) * 100).toFixed(2);
+        }
+        $.getJSON(ajax_link, {
+            action: 'change-profit',
+            sku: $(this).data('sku'),
+            profit: profit
+        }, function(res) {
+            $('#profit-' + id_product).val(profit);
+        })
+    });
+
+    $('.migrate-products').on('click', '.checkbox', function(e) {
+        let count = parseInt($('#selected-products').text());
+        if (e.target.checked) {
+            $('#selected-products').text(count + 1);
+        } else {
+            $('#selected-products').text(count - 1);
+        }
+        showBulkActionButtons();
     });
 </script>
 @endsection
