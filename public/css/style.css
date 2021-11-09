@@ -1648,33 +1648,18 @@ svg {
   color: #6a6c6f;
   margin: 0;
 }
-@media (max-width: 1200px) {
-  .pagetitle {
-    font-size: 23px;
-  }
-}
-.greentable, .resumetable {
+.resumetable {
   width: 100%;
   background-color: #ffffff;
 }
 .greentable {
+  width: 100%;
+  background-color: #ffffff;
   border: solid 1px #d7e0f1;
-  margin-bottom: 60px;
-  margin-top: 20px;
-}
-@media (max-width: 1200px) {
-  .greentable {
-    background-color: transparent;
-    border: none;
-  }
+  margin: 40px 0px;
 }
 .greentable .w100 {
   width: 156px;
-}
-@media (max-width: 1200px) {
-  .greentable .w100 {
-    width: auto;
-  }
 }
 .greentable .skutd {
   width: 130px;
@@ -1684,27 +1669,12 @@ svg {
     background: transparent;
     text-align: center;
 }
-@media (max-width: 1200px) {
-  .greentable .skutd {
-    width: auto;
-  }
-}
 .greentable .skutd input {
   max-width: unset !important;
-}
-@media (max-width: 1200px) {
-  .greentable .skutd input {
-    max-width: 100px !important;
-  }
 }
 .greentable thead {
   background-color: #f7f9fc;
   vertical-align: middle;
-}
-@media (max-width: 1200px) {
-  .greentable thead {
-    display: none;
-  }
 }
 .greentable thead th {
   padding: 20px;
@@ -1732,9 +1702,34 @@ svg {
 .greentable tr .nowrap {
   white-space: nowrap;
 }
+.nowrap {
+  white-space: nowrap;
+}
 @media (max-width: 1200px) {
+  .greentable {
+    background-color: transparent;
+    border: none;
+  }
+  .pagetitle {
+    font-size: 23px;
+  }
+  .greentable .w100 {
+    width: auto;
+  }
+  .greentable .skutd {
+    width: auto;
+  }
+  .greentable .skutd input {
+    max-width: 100px !important;
+  }
+  .greentable thead {
+    display: none;
+  }
   .greentable tbody tr {
     display: block;
+  }
+  .greentable tbody tr.order-detail {
+    margin-bottom: 20px;
   }
   .greentable tbody tr.productdatarow, .greentable tbody tr.orderrow, .greentable tbody tr.merchantrow, .greentable tbody tr.userdatarow {
     margin-top: 40px;
@@ -1744,7 +1739,7 @@ svg {
   }
 }
 .greentable tbody tr td, .resumetable tbody tr td {
-  padding: 20px;
+  padding: 10px;
   font-family: Roboto;
   font-size: 18px;
   font-weight: normal;
@@ -1756,19 +1751,30 @@ svg {
   color: #6a6c6f;
   min-height: 38px;
 }
+.greentable tbody tr.order-detail td:first-child {
+  padding: 0px;
+}
+.greentable tbody tr.order-detail td .product-name {
+  text-align: left;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .greentable tbody tr td {
   border-bottom: solid 1px #d7e0f1;
 }
-.greentable tbody tr td.pimage {
-  width: 97px;
+.greentable.my-products tbody tr td {
+  padding: 10px;
 }
-@media (max-width: 1600px) {
-  .greentable tbody tr td, .resumetable tbody tr td {
-    font-size: 13px;
-  }
+.greentable tbody tr td.pimage {
+  width: 90px;
+  height: 90px;
+  padding: 0px;
 }
 @media (max-width: 1560px) {
   .greentable tbody tr td, .resumetable tbody tr td {
+    font-size: 1rem;
     padding: 10px;
   }
 }
@@ -1777,12 +1783,46 @@ svg {
   padding-top: 5px;
   padding-bottom: 5px;
 }
+.greentable tbody tr td#action {
+  width: 151px;
+}
+.greentable tbody tr td.action-buttons {
+  width: 320px;
+}
+.greentable tbody tr td.action-buttons .viewbutton {
+  width: 45%;
+  min-width: 135px;
+}
+.greentable tbody tr td.action-buttons .deletebutton {
+  width: 45%;
+  min-width: 135px;
+}
+.greentable tbody tr td.product-name a, .greentable tbody tr td.product-name span {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 @media (max-width: 1200px) {
   .greentable tbody tr td {
     display: block;
     text-align: right;
     border: solid 1px #d7e0f1;
     background-color: #ffffff;
+  }
+  .greentable tbody tr.order-detail td .product-name {
+    text-align: right;
+  }
+  .greentable tbody tr td.action-buttons {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+  .greentable tbody tr td.action-buttons img {
+    margin: 0px !important;
+  }
+  .greentable tbody tr td.product-name {
+    text-align: right !important;
   }
   .greentable tbody tr #action {
     display: flex;
@@ -1802,7 +1842,7 @@ svg {
     width: 100%;
   }
   .greentable tbody tr td.pimage img {
-    max-width: 11%;
+    width: 80px;
   }
 }
 .greentable tbody tr .sku {
@@ -1821,18 +1861,17 @@ svg {
   text-align: center;
   color: #ffffff;
   text-decoration: none;
-  display: grid;
-  height: 34px;
-  padding: 5px;
-  padding-left: 20px;
-  padding-right: 40px;
+  height: 43px;
+  padding: 0px 40px 0px 20px;
   align-content: center;
   background-image: url(/img/view.png);
   background-repeat: no-repeat;
-  background-position: right 10px center;
+  background-position: right 20px center;
   border-radius: 10px;
   border: none;
   cursor: pointer;
+  width: 90%;
+  max-width: 224px;
 }
 .greentable tbody .viewbutton:hover {
   background-color: #42b253;
@@ -1852,28 +1891,26 @@ svg {
   }
 }
 .greentable tbody .deletebutton, .myproducts .alldeletebutton {
-  background-color: #f39ca2;
+  background-color: #F72525;
   font-family: Roboto;
   font-size: 18px;
   text-align: center;
   color: #ffffff;
   text-decoration: none;
-  display: grid;
-  height: 34px;
-  padding: 5px;
-  padding-left: 20px;
-  padding-right: 40px;
-  align-content: center;
+  height: 43px;
+  padding: 0px 40px 0px 20px;
+  align-items: center;
   background-image: url(/img/delete.png);
   background-repeat: no-repeat;
-  background-position: right 10px center;
+  background-position: right 20px center;
   border-radius: 10px;
   border: none;
   cursor: pointer;
-  width: 135px;
+  width: 90%;
+  max-width: 224px;
 }
 .greentable tbody .deletebutton:hover {
-  background-color: #ee949a;
+  background-color: #E10000;
 }
 .merchant-search {
     padding-left: 10px;
@@ -1897,7 +1934,8 @@ svg {
     height: 40px;
     border-radius: 4px;
     font-size: 16px;
-    margin-left: 20px;
+    margin-left: 10px;
+    padding: 0px 5px;
 }
 @media (max-width: 1460px) {
   .greentable tbody .deletebutton {
@@ -1910,9 +1948,11 @@ svg {
   }
 }
 .greentable tbody .productphoto {
-  border: solid 1px #d7e0f1;
   padding: 5px;
   box-sizing: border-box;
+}
+.greentable tbody .productphoto img {
+  height: 80px;
 }
 .greentable tbody .productlisthow {
   display: grid;
@@ -1946,7 +1986,7 @@ svg {
 }
 .greentable tbody .productlisthow .productdata .price {
   text-align: left;
-  font-size: 31.5px;
+  font-size: 27px;
   font-weight: bold;
   color: #44b955;
   margin: 0;
@@ -1954,7 +1994,7 @@ svg {
 }
 @media (max-width: 1200px) {
   .greentable tbody .productlisthow .productdata .price {
-    font-size: 22px;
+    font-size: 18px;
   }
 }
 .greentable tbody .productlisthow .productdata p {
@@ -1973,8 +2013,7 @@ svg {
 }
 .greentable tbody .productlisthow .productdata .pbuttons {
   display: grid;
-  grid-template-columns: minmax(auto, 230px) minmax(auto, 230px);
-  column-gap: 20px;
+  grid-template-columns: minmax(auto, 230px);
   margin-top: 15px;
 }
 @media (max-width: 945px) {
@@ -1988,54 +2027,24 @@ svg {
   font-size: 19px;
   font-weight: bold;
   text-align: center;
-  color: #ffffff;
-  background-color: #44b955;
+  color: #44b955;
+  background-color: #ffffff;
   text-decoration: none;
-  display: grid;
   min-height: 42px;
-  padding: 5px;
-  padding-left: 10px;
-  padding-right: 40px;
+  padding: 0px;
   align-content: center;
-  background-image: url(/img/edit.png);
-  background-repeat: no-repeat;
-  background-position: right 8px center;
   box-sizing: border-box;
   border-radius: 10px;
-  border: none;
+  border: solid 1px #44b955;
+  cursor: pointer;
 }
-.greentable tbody .productlisthow .productdata .pbuttons .edit:hover {
-  background-color: #42b253;
+.greentable tbody .productlisthow .productdata .pbuttons .edit:focus {
+  border: solid 1px #44b955;
+  outline: none;
 }
 @media (max-width: 1200px) {
   .greentable tbody .productlisthow .productdata .pbuttons .edit {
     font-size: 14px;
-  }
-}
-.greentable tbody .productlisthow .productdata .pbuttons .delete {
-  font-family: Roboto;
-  font-size: 19px;
-  font-weight: bold;
-  text-align: center;
-  color: #ffffff;
-  background-color: #f39ca2;
-  text-decoration: none;
-  display: grid;
-  min-height: 42px;
-  padding-left: 10px;
-  padding-right: 40px;
-  align-content: center;
-  background-image: url(/img/delete.png);
-  background-repeat: no-repeat;
-  background-position: right 25px center;
-  box-sizing: border-box;
-  border-radius: 10px;
-  border: none;
-}
-@media (max-width: 1200px) {
-  .greentable tbody .productlisthow .productdata .pbuttons .delete {
-    font-size: 14px;
-    background-position: right 37px center;
   }
 }
 #pagination1 {
@@ -2074,7 +2083,7 @@ svg {
 }
 .sendtoshopify {
   display: grid;
-  grid-template-columns: 21px 1fr;
+  grid-template-columns: minmax(70px, auto) 1fr;
   column-gap: 15px;
   align-items: center;
 }
@@ -2083,9 +2092,22 @@ svg {
   height: 21px;
   border: solid 1px #e1e9ec;
 }
+.sendtoshopify .checksend {
+  display: flex;
+  align-items: center;
+}
+.sendtoshopify .checksend #selected-products {
+  display: none;
+  font-size: 21px;
+  margin-left: 10px;
+  color: #fff;
+  background: #44b955;
+  border-radius: 50%;
+  padding: 0px 5px;
+  cursor: default;
+}
 .sendtoshopify button, .migrate-products button {
-  display: grid;
-  align-content: center;
+  align-items: center;
   border: none;
   padding: 8px;
   font-family: Roboto;
@@ -2101,6 +2123,55 @@ svg {
   cursor: pointer;
   display: flex;
   justify-content: center;
+  height: 43px;
+}
+.sendtoshopify .btn-import-list-send-all {
+  background-color: #44b955;
+  align-items: center;
+  border: none;
+  padding: 8px;
+  font-family: Roboto;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: left;
+  color: #ffffff;
+  width: 100%;
+  max-width: 224px;
+  min-width: 130px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  background-image: url(/img/edit.png);
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding: 0px 40px 0px 10px;
+  height: 43px;
+}
+
+.sendtoshopify .btn-import-list-delete-all, .sendtoshopify .btn-mp-delete-all {
+  background-color: #F72525;
+  align-items: center;
+  border: none;
+  font-family: Roboto;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: left;
+  color: #ffffff;
+  width: 100%;
+  max-width: 224px;
+  min-width: 130px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  background-image: url(/img/delete.png);
+  background-repeat: no-repeat;
+  background-position: right 20px center;
+  padding: 0px 40px 0px 10px;
+  height: 43px;
 }
 .greenbutton {
   background-color: #44b955 !important;
@@ -2143,15 +2214,13 @@ svg {
     text-align: center;
   }
 }
+.btn-import-actions {
+  display: flex;
+}
 @media (max-width: 600px) {
   .sendtoshopify button {
     font-size: 15px;
   }
-}
-.btn-import-actions {
-  display: flex;
-}
-@media (max-width: 500px) {
   .btn-import-actions {
     flex-direction: column;
   }
@@ -2407,11 +2476,9 @@ svg {
     max-width: 450px;
   }
 }
-@media (min-width: 500px) {
-  .productboxelement .producttabs .headertabs .buttons .delete, .productboxelement .producttabs .headertabs .buttons .sendto, .sendtoshopify button, .migrate-products button {
+@media (min-width: 600px) {
+  .sendtoshopify button {
     flex: 0 1 224px;
-    margin-top: 5px;
-    margin-bottom: 5px;
   }
 }
 @media (min-width: 800px) {
@@ -2424,7 +2491,7 @@ svg {
   }
 }
 @media (min-width: 860px) {
-  .productboxelement .producttabs .headertabs .buttons .delete, .productboxelement .producttabs .headertabs .buttons .sendto, .sendtoshopify button, .migrate-products button {
+  .productboxelement .producttabs .headertabs .buttons .delete, .productboxelement .producttabs .headertabs .buttons .sendto, .sendtoshopify button {
     flex: 0 1 224px;
   }
 }
@@ -2440,7 +2507,7 @@ svg {
   }
 }
 @media (min-width: 1510px) {
-  .productboxelement .producttabs .headertabs .buttons .delete, .productboxelement .producttabs .headertabs .buttons .sendto, .sendtoshopify button, .migrate-products button {
+  .sendtoshopify button {
     flex: 0 1 224px;
   }
 }
@@ -3624,12 +3691,14 @@ select {
   outline: none;
 }
 .plantitle {
-    font-size: 26px;
-    font-weight: 700;
-    color: #89b73d;
-    margin: 0;
-    text-align: center;
-    padding: 30px;
+  font-size: 30px;
+  color: #297741;
+  margin: 0;
+  text-align: center;
+  padding: 30px;
+}
+.plantitle span {
+  font-size: 1.5rem;
 }
 .plantitle.gray {
     color: #6a6c6f;
@@ -3638,7 +3707,18 @@ select {
   font-size: 48px;
 }
 .leftSide p{text-align: center;}
-.titlecol #txtToken{height: 35px !important;}
+.titlecol #txtToken {
+  height: 42px;
+  border: solid 1px #929292;
+  padding-left: 10px;
+  font-size: 1rem;
+  margin-top: 11px;
+  max-width: 200px;
+  width: 100%
+}
+.titlecol #txtToken:focus {
+  outline: none;
+}
 #btnSubmitToken{
     background-color: #44b955;
     color: #fff;
@@ -3652,67 +3732,27 @@ select {
     text-align: center;
     border-radius: 10px;
     min-height: 42px;
+    cursor: pointer;
+}
+#btnSubmitToken:focus {
+  border: none;
+  outline: none;
 }
 a.buttonget:hover{
   color: #fff;
   cursor:   pointer;
 }
-@media (max-width: 1200px) {
-  .plantitle.hello {
-    font-size: 35px;
-  }
-}
-@media (max-width: 500px) {
-  .plantitle.hello {
-    font-size: 25px;
-  }
-}
-@media (max-width: 1200px) {
+@media (max-width: 1024px) {
   .plantitle {
-    font-size: 30px;
+    font-size: 1.5rem;
+  }
+  .plantitle span {
+    font-size: 1.25rem;
   }
 }
 @media (max-width: 400px) {
   .plantitle {
     font-size: 20px;
-  }
-}
-.formve {
-  display: grid;
-  grid-template-columns: 1fr minmax(auto, 141px);
-  justify-content: center;
-  margin-top: 29px;
-}
-@media (max-width: 360px) {
-  .formve {
-    grid-template-columns: 1fr;
-    grid-row-gap: 10px;
-  }
-}
-.formve input {
-  border: 1px solid #dce4f3;
-  height: 35px;
-  padding: 5px;
-  box-sizing: border-box;
-  font-size: 22px;
-  color: #6a6c6f;
-}
-@media (max-width: 1200px) {
-  .formve input {
-    font-size: 18px;
-  }
-}
-.formve button {
-  background-color: #1a6e34;
-  color: #fff;
-  border: none;
-  font-size: 16px;
-  font-weight: 700;
-  padding: 5px;
-}
-@media (max-width: 1200px) {
-  .formve button {
-    font-size: 15px;
   }
 }
 .pricecols {
@@ -3729,6 +3769,10 @@ a.buttonget:hover{
   grid-template-rows: auto 1fr minmax(auto, 143px);
   padding-top: 40px;
 }
+.pricecols .headp {
+  border-bottom: 1px solid #edf2f5;
+  height: 150px;
+}
 @media (max-width: 1050px) {
   .pricecols {
     grid-template-columns: 1fr;
@@ -3736,21 +3780,19 @@ a.buttonget:hover{
   }
   .pricecols > div {
     margin-bottom: 50px;
+    border-top: 3px solid #89b73d;
+    padding-top: 0px;
+    grid-template-rows: auto 1fr minmax(auto, 100px);
   }
   .pricecols > div:last-child {
     margin-bottom: 0;
   }
-}
-.pricecols .headp {
-  border-bottom: 1px solid #edf2f5;
-}
-@media (max-width: 1050px) {
   .pricecols .headp {
-    border-top: 3px solid #89b73d;
+    height: auto;
   }
 }
 .pricecols .headp p {
-  font-size: 20px;
+  font-size: 1.5rem;
   color: #6a6c6f;
   letter-spacing: 2px;
 }
@@ -3768,7 +3810,6 @@ a.buttonget:hover{
   font-size: 41px;
   color: #6a6c6f;
   margin: 0;
-  margin-bottom: 44px;
 }
 @media (max-width: 1200px) {
   .pricecols .headp h3 {
@@ -3791,7 +3832,7 @@ a.buttonget:hover{
 }
 .pricecols .wrappc li{
     display: flex;
-    align-items: center;
+    align-items: baseline;
     text-align: left;
 }
 @media (max-width: 1200px) {
@@ -3823,11 +3864,14 @@ a.buttonget:hover{
 }
 .pricecols .buttonsp {
   border-top: 1px solid #edf2f5;
-  padding-top: 35px;
-  padding-bottom: 35px;
   border-right: 1px solid #edf2f5;
-  padding-left: 30px;
-  padding-right: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.pricecols .buttonsp span {
+  font-size: 1rem;
+  color: #6a6c6f;
 }
 .pricecols .buttonsp .update {
     background-color: #44b955;
@@ -3840,6 +3884,7 @@ a.buttonget:hover{
     max-width: 250px;
     border-radius: 10px;
     cursor: pointer;
+    height: 43px;
 }
 .pricecols .buttonsp .update:hover {
   background-color: #42b253;
@@ -3858,11 +3903,16 @@ a.buttonget:hover{
     padding: 5px;
     width: 100%;
     max-width: 250px;
-    border-radius: 14px;
+    border-radius: 10px;
+    height: 43px;
+}
+.pricecols .buttonsp .buttonDisabled:focus {
+  border: none;
+  outline: none;
 }
 .pricecols .buttonsp .currentPlan{
-    font-size: 1.2rem;
-    color: green;
+  font-size: 1.25rem;
+  color: green;
 }
 .pricecols .buttonsp .spanAnswer  {
     float: left;
@@ -3874,66 +3924,6 @@ a.buttonget:hover{
 }
 @media (max-width: 1200px) {
   .pricecols .buttonsp .update {
-    font-size: 18px;
-  }
-}
-.donto {
-  font-size: 30px;
-  font-weight: 700;
-  color: #333333;
-  text-align: center;
-  margin: 0;
-  margin-bottom: 17px;
-}
-@media (max-width: 1200px) {
-  .donto {
-    font-size: 22px;
-  }
-}
-@media (max-width: 500px) {
-  .donto {
-    font-size: 18px;
-  }
-}
-.getit {
-  font-size: 22px;
-  color: #fff;
-  font-weight: 700;
-  background-color: #1a6e34;
-  border: none;
-  padding: 10px;
-  width: 100%;
-  max-width: 136px;
-  margin-left: auto;
-  margin-right: auto;
-  display: table;
-}
-@media (max-width: 1200px) {
-  .getit {
-    font-size: 16px;
-  }
-}
-@media (max-width: 500px) {
-  .getit {
-    font-size: 14px;
-  }
-}
-.splan {
-  font-size: 36px;
-  color: #333333;
-  font-weight: 700;
-  text-align: center;
-  margin: 0;
-  margin-top: 5px;
-  margin-bottom: 70px;
-}
-@media (max-width: 1200px) {
-  .splan {
-    font-size: 27px;
-  }
-}
-@media (max-width: 500px) {
-  .splan {
     font-size: 18px;
   }
 }
@@ -3960,8 +3950,7 @@ button.back {
   text-align: center;
   border: none;
   min-width: 100px;
-  /* margin-bottom: 13px; */
-  border-radius: 5px;
+  border-radius: 4px;
   font-size: 21px;
 }
 @media (max-width: 600px) {
@@ -4210,6 +4199,7 @@ button.back {
 .tokentext ol {
   text-align: left;
   font-size: 17px;
+  margin: 0 0 0 1rem;
 }
 
 .tokentext .tokeninpt {
@@ -4221,7 +4211,8 @@ button.back {
 }
 
 .tokentext p {
-  font-size: 17px;
+  font-size: 1.125rem;
+  margin: 0;
 }
 
 .producttabs .imagewrap img {
