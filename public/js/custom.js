@@ -1625,7 +1625,7 @@ function introductionDiscountProducts(page_number) {
                             </div>
                             <div class="product-sku">
                                 <span style="text-decoration: line-through; color: #a2a2a2">US $${parseFloat(discount_product.price).toFixed(2)}</span>
-                                <span class="product-price"> US $${parseFloat(discount_product.monthly_special).toFixed(2)}</span>
+                                <span class="product-price"> US $${discount_product.monthly_special < discount_product.price ? parseFloat(discount_product.monthly_special).toFixed(2) : parseFloat(discount_product.price).toFixed(2)}</span>
                                 <span class="simple-tooltip text-white" style="font-size:1rem; padding: 1px 7px;" title="price valid until ${date}"><i class="fa fa-info" aria-hidden="true"></i></span>
                             </div>
                         </div>
@@ -1788,7 +1788,7 @@ function discountProducts(page_number) {
                             </div>
                             <div class="product-sku">
                                 <span style="text-decoration: line-through; color: #a2a2a2">US $${parseFloat(discount_product.price).toFixed(2)}</span>
-                                <span class="product-price"> US $${parseFloat(discount_product.monthly_special).toFixed(2)}</span>
+                                <span class="product-price"> US $${discount_product.monthly_special < discount_product.price ? parseFloat(discount_product.monthly_special).toFixed(2) : parseFloat(discount_product.price).toFixed(2)}</span>
                                 <span class="simple-tooltip text-white" style="font-size:1rem; padding: 1px 7px;" title="price valid until ${date}"><i class="fa fa-info" aria-hidden="true"></i></span>
                             </div>
                         </div>

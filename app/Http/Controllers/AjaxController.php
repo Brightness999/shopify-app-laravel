@@ -676,7 +676,7 @@ class AjaxController extends Controller
         }
         
         if ($parameters['action'] == 'introduction-discount-products') {
-            $discount_products = Products::select('*', DB::raw('(suggested_retail-monthly_special)/suggested_retail*100 AS discount'))
+            $discount_products = Products::select('*', DB::raw('(CASE WHEN monthly_special * 1 > price * 1 THEN (suggested_retail-monthly_special)/suggested_retail*100 ELSE (suggested_retail-price)/suggested_retail*100 END) AS discount'))
                 ->where('stock', '>', 0)
                 ->where('monthly_special', '>', 0)
                 ->where('suggested_retail', '>', 0)
@@ -733,7 +733,7 @@ class AjaxController extends Controller
         }
         
         if ($parameters['action'] == 'discount-products') {
-            $discount_products = Products::select('*', DB::raw('(suggested_retail-monthly_special)/suggested_retail*100 AS discount'))
+            $discount_products = Products::select('*', DB::raw('(CASE WHEN monthly_special * 1 > price * 1 THEN (suggested_retail-monthly_special)/suggested_retail*100 ELSE (suggested_retail-price)/suggested_retail*100 END) AS discount'))
                 ->where('stock', '>', 0)
                 ->where('monthly_special', '>', 0)
                 ->where('suggested_retail', '>', 0)
